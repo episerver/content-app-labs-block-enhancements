@@ -8,6 +8,9 @@
     <EmbeddedResource Include="EmbeddedLangFiles\**\*" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="EPiServer.CMS.UI.Sources" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\EPiServer.Labs.BlockEnhancements\EPiServer.Labs.BlockEnhancements.csproj" />
   </ItemGroup>
 </Project>

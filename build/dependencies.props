@@ -12,6 +12,7 @@
         <PackageReference Update="EPiServer.CMS.AspNetCore.HtmlHelpers" Version="$(CmsCoreVersion)"/>
         <PackageReference Update="EPiServer.CMS.UI" Version="$(CmsUIVersion)"/>
         <PackageReference Update="EPiServer.CMS.UI.Core" Version="$(CmsUIVersion)"/>
+        <PackageReference Update="EPiServer.CMS.UI.Sources" Version="$(CmsUIVersion)"/>
         <PackageReference Update="EPiServer.CMS.AspNetCore.Templating" Version="$(CmsCoreVersion)" />
         <PackageReference Update="EPiServer.CMS.UI.AspNetIdentity" Version="$(CmsUIVersion)"/>
         <PackageReference Update="EPiServer.CMS.UI.VisitorGroups" Version="$(CmsUIVersion)"/>
