@@ -7,10 +7,6 @@ REM Ensure all the node modules are installed.
 CALL yarn install
 IF %errorlevel% NEQ 0 EXIT /B %errorlevel%
 
-REM Run the setup task.
-CALL yarn gulp setup
-IF %errorlevel% NEQ 0 EXIT /B %errorlevel%
-
 REM Install react app dependencies
 CALL yarn --cwd src/EPiServer.Labs.BlockEnhancements/React install
 IF %errorlevel% NEQ 0 EXIT /B %errorlevel%

@@ -18,6 +18,10 @@ REM Build the C# solution.
 powershell "%CD%\build\build.ps1" -configuration %Configuration% -logger %Logger%
 IF %errorlevel% NEQ 0 EXIT /B %errorlevel%
 
+REM Run the setup task.
+CALL yarn gulp setup
+IF %errorlevel% NEQ 0 EXIT /B %errorlevel%
+
 REM Build the JavaScript solution.
 yarn --cwd src/EPiServer.Labs.BlockEnhancements/React build
 IF %errorlevel% NEQ 0 EXIT /B %errorlevel%
