@@ -7,9 +7,11 @@ using EPiServer.Cms.Shell.UI.Rest.Projects.Internal;
 using EPiServer.Core;
 using EPiServer.Globalization;
 using EPiServer.Security;
+using EPiServer.ServiceLocation;
 
 namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
 {
+    [ServiceConfiguration]
     public class LatestContentVersionResolver
     {
         private readonly IContentStoreModelCreator _contentStoreModelCreator;

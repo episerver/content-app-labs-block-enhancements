@@ -1,0 +1,20 @@
+<Project>
+    <PropertyGroup>
+        <CmsCoreVersion>12.2.0-pre-021346</CmsCoreVersion>
+        <CmsUIVersion>12.2.1</CmsUIVersion>
+        <TelemetryVersion>2.0.1</TelemetryVersion>
+        <TinyMceVersion>3.0.1</TinyMceVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Update="EPiServer.Telemetry.UI" Version="$(TelemetryVersion)"/>
+        <PackageReference Update="EPiServer.CMS.TinyMce" Version="$(TinyMceVersion)"/>
+        <PackageReference Update="EPiServer.CMS.AspNetCore.HtmlHelpers" Version="$(CmsCoreVersion)"/>
+        <PackageReference Update="EPiServer.CMS.UI" Version="$(CmsUIVersion)"/>
+        <PackageReference Update="EPiServer.CMS.UI.Core" Version="$(CmsUIVersion)"/>
+        <PackageReference Update="EPiServer.CMS.AspNetCore.Templating" Version="$(CmsCoreVersion)" />
+        <PackageReference Update="EPiServer.CMS.UI.AspNetIdentity" Version="$(CmsUIVersion)"/>
+        <PackageReference Update="EPiServer.CMS.UI.VisitorGroups" Version="$(CmsUIVersion)"/>
+        <PackageReference Update="EPiServer.Hosting" Version="$(CmsCoreVersion)"/>
+    </ItemGroup>
+</Project>

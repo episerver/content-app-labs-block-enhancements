@@ -2,9 +2,11 @@ using EPiServer.Approvals;
 using EPiServer.Approvals.ContentApprovals;
 using EPiServer.Cms.Shell.UI.Rest.Models.Internal;
 using EPiServer.Core;
+using EPiServer.ServiceLocation;
 
 namespace EPiServer.Labs.BlockEnhancements
 {
+    [ServiceConfiguration]
     public class ApprovalResolver
     {
         private readonly IApprovalDefinitionRepository _approvalDefinitionRepository;

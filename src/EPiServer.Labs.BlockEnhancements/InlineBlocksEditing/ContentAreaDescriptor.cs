@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using EPiServer.Cms.Shell.UI.ObjectEditing.EditorDescriptors;
 using EPiServer.Core;
+using EPiServer.ServiceLocation;
 using EPiServer.Shell.ObjectEditing;
 
 namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
 {
+    [ServiceConfiguration]
     public class ContentAreaDescriptor : ContentAreaEditorDescriptor
     {
         private readonly BlockEnhancementsOptions _options;

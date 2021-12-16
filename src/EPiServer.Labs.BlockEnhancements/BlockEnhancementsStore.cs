@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Mvc;
-using EPiServer.Cms.Shell.UI.Rest;
 using EPiServer.Cms.Shell.UI.Rest.Models.Internal;
 using EPiServer.Core;
 using EPiServer.Labs.BlockEnhancements.InlineBlocksEditing;
 using EPiServer.Shell.Services.Rest;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EPiServer.Labs.BlockEnhancements
 {
@@ -15,19 +14,14 @@ namespace EPiServer.Labs.BlockEnhancements
     {
         private readonly LatestContentVersionResolver _latestContentVersionResolver;
         private readonly DependenciesResolver _dependenciesResolver;
-        private readonly LocalBlockConverter _localBlockConverter;
         private readonly IContentLoader _contentLoader;
-        private readonly IContentStoreModelCreator _contentStoreModelCreator;
 
         public BlockEnhancementsStore(LatestContentVersionResolver latestContentVersionResolver,
-            DependenciesResolver dependenciesResolver, LocalBlockConverter localBlockConverter,
-            IContentLoader contentLoader, IContentStoreModelCreator contentStoreModelCreator)
+            DependenciesResolver dependenciesResolver, IContentLoader contentLoader)
         {
             _latestContentVersionResolver = latestContentVersionResolver;
             _dependenciesResolver = dependenciesResolver;
-            _localBlockConverter = localBlockConverter;
             _contentLoader = contentLoader;
-            _contentStoreModelCreator = contentStoreModelCreator;
         }
 
         /// <summary>
@@ -44,7 +38,6 @@ namespace EPiServer.Labs.BlockEnhancements
                 return Rest(dependencies);
             }
 
-            var queryString = ControllerContext.HttpContext.Request.QueryString;
             if (contentLink != null)
             {
                 var localContentOwner = _contentLoader.GetAncestors(contentLink).FirstOrDefault(x =>
@@ -62,7 +55,8 @@ namespace EPiServer.Labs.BlockEnhancements
             var items = new List<EnhancedStructureStoreContentDataModel>();
             foreach (var itemId in ids)
             {
-                items.Add(_latestContentVersionResolver.GetLatestVersion(itemId, queryString));
+                items.Add(_latestContentVersionResolver.GetLatestVersion(itemId,
+                    ControllerContext.HttpContext.Request.Query.ToNameValues()));
             }
 
             return Rest(items);

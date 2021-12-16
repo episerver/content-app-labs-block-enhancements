@@ -1,7 +1,8 @@
-using System.Web;
 using EPiServer.Core;
 using EPiServer.Framework.Cache;
 using EPiServer.ServiceLocation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
 {
@@ -10,13 +11,13 @@ namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
     {
         private readonly IContentLoader _contentLoader;
         private readonly IObjectInstanceCache _cache;
-        private readonly ServiceAccessor<HttpContextBase> _httpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly BlockEnhancementsOptions _blockEnhancementsOptions;
         internal const string CacheKey = "EPi:Labs:IsLocalBlock";
         private static readonly object _cacheLock = new object();
 
         public LocalBlockResolver(IContentLoader contentLoader, IObjectInstanceCache cache,
-            ServiceAccessor<HttpContextBase> httpContextAccessor, BlockEnhancementsOptions blockEnhancementsOptions)
+            IHttpContextAccessor httpContextAccessor, BlockEnhancementsOptions blockEnhancementsOptions)
         {
             _contentLoader = contentLoader;
             _cache = cache;
@@ -26,8 +27,8 @@ namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
 
         public bool ShouldFilterOutLocalBlocks()
         {
-            return _blockEnhancementsOptions.LocalContentFeatureEnabled && _httpContextAccessor() != null &&
-                   _httpContextAccessor().Request.RawUrl.Contains("/project-item/");
+            return _blockEnhancementsOptions.LocalContentFeatureEnabled && _httpContextAccessor.HttpContext != null &&
+                   _httpContextAccessor.HttpContext.Request.GetDisplayUrl().Contains("/project-item/");
         }
 
         public bool IsLocal(ContentReference contentLink)

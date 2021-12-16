@@ -4,19 +4,17 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Web;
-using System.Web.Mvc;
-using System.Web.UI.WebControls;
-using Castle.Facilities.TypedFactory.Internal;
-using EPiServer.Cms.Shell;
 using EPiServer.Cms.Shell.Service.Internal;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
+using EPiServer.Editor;
 using EPiServer.Framework.Localization;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
-using EPiServer.Shell;
 using EPiServer.Shell.Services.Rest;
 using EPiServer.Web;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EPiServer.Labs.BlockEnhancements
 {
@@ -27,14 +25,14 @@ namespace EPiServer.Labs.BlockEnhancements
         private readonly IContentRepository _contentRepository;
         private readonly ContentLoaderService _contentLoaderService;
         private readonly ServiceAccessor<SiteDefinition> _currentSiteDefinition;
-        private readonly ServiceAccessor<HttpContextBase> _httpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly LocalizationService _localizationService;
         private readonly ContentAssetHelper _contentAssetHelper;
 
         public LocalContentAnalyzerController(IContentModelUsage contentModelUsage,
             IContentTypeRepository contentTypeRepository, IContentRepository contentRepository,
             ContentLoaderService contentLoaderService,
-            ServiceAccessor<SiteDefinition> currentSiteDefinition, ServiceAccessor<HttpContextBase> httpContextAccessor,
+            ServiceAccessor<SiteDefinition> currentSiteDefinition, IHttpContextAccessor httpContextAccessor,
             LocalizationService localizationService, ContentAssetHelper contentAssetHelper)
         {
             _contentModelUsage = contentModelUsage;
@@ -95,8 +93,7 @@ namespace EPiServer.Labs.BlockEnhancements
                         RealSharedBlocks =
                             count - localCount - unusedSharedBlocks - sharedBlocksReferencedJustOnceCount,
                         LocalBlockRatio = Math.Round((decimal)localCount / count * 100) + "%",
-                    },
-                SafeResponse = true
+                    }
             };
         }
 
@@ -119,7 +116,7 @@ namespace EPiServer.Labs.BlockEnhancements
             }
 
             var sharedBlocksToConvert = new List<Dependency>();
-            var currentUser = _httpContextAccessor()?.User?.Identity?.Name;
+            var currentUser = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
             var you = _localizationService.GetStringByCulture("/episerver/shared/text/yousubject",
                 CultureInfo.CurrentCulture);
 
@@ -138,7 +135,7 @@ namespace EPiServer.Labs.BlockEnhancements
                     Name = content.Name,
                     TypeIdentifier = content.GetOriginalType().Name,
                     TreePath = GetTreePath(content),
-                    Uri = GetUrl(content)
+                    Uri = new Uri(PageEditing.GetEditUrl(content.ContentLink))
                 };
 
                 if (content is IChangeTrackable changeTrackable)
@@ -154,8 +151,7 @@ namespace EPiServer.Labs.BlockEnhancements
 
             return new RestResult
             {
-                Data = sharedBlocksToConvert.Take(maxItemsToDisplay),
-                SafeResponse = true
+                Data = sharedBlocksToConvert.Take(maxItemsToDisplay)
             };
         }
 
@@ -183,22 +179,6 @@ namespace EPiServer.Labs.BlockEnhancements
         {
             return _contentLoaderService.GetAncestorNames(content, _currentSiteDefinition())
                 .Select(HttpUtility.HtmlEncode);
-        }
-
-        private Uri GetUrl(IContent content)
-        {
-            try
-            {
-                var uiUrl = Configuration.Settings.Instance.UIUrl;
-                var epiPrefix = uiUrl.ToString().Trim('~');
-                var siteUrl = Request.Url.GetLeftPart(UriPartial.Authority) + Request.ApplicationPath + epiPrefix;
-                var epiUrl = new Uri(siteUrl, UriKind.Absolute);
-                return new Uri(epiUrl + "#context=" + content.GetUri(), UriKind.Absolute);
-            }
-            catch
-            {
-                return null;
-            }
         }
 
         private bool IsBlock(ContentReference contentLink)

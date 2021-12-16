@@ -7,7 +7,6 @@ using EPiServer.Cms.Shell.UI.Rest.Projects;
 using EPiServer.Cms.Shell.UI.Rest.Projects.Internal;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
-using EPiServer.Framework.Configuration;
 using EPiServer.Framework.Localization;
 using EPiServer.Shell.Services.Rest;
 
@@ -22,11 +21,11 @@ namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
             ProjectPublisher projectPublisher, ContentService contentService,
             IContentChangeManager contentChangeManager,
             LanguageSelectorFactory languageSelectorFactory, CurrentProject currentProject,
-            ISiteConfigurationRepository siteConfigurationRepository, IConfigurationSource configurationSource,
+            ISiteConfigurationRepository siteConfigurationRepository, ProjectUIOptions projectUIOptions,
             ApprovalService approvalService, LocalizationService localizationService,
             LocalBlockResolver localBlockResolver) : base(projectRepository,
             projectPublisher, contentService, contentChangeManager, languageSelectorFactory, currentProject,
-            siteConfigurationRepository, configurationSource, approvalService, localizationService)
+            siteConfigurationRepository, approvalService, localizationService, projectUIOptions)
         {
             _defaultProjectService = defaultProjectService;
             _localBlockResolver = localBlockResolver;

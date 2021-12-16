@@ -1,12 +1,26 @@
 @ECHO OFF
 SETLOCAL
 
-SET PATH=.\.ci\tools\;.\build\tools\;%PATH%
+SET PATH=.\.ci\tools\;%PATH%
 
-msbuild /p:Configuration=Release
+REM Set Release or Debug configuration.
+IF "%1"=="Release" (set CONFIGURATION=Release) ELSE (set CONFIGURATION=Debug)
+ECHO Building in %CONFIGURATION%
+
+REM Set the build version. Using defaults when no params are given (common when running locally).
+IF "%2"=="" ( SET BUILD=01 ) ELSE ( SET BUILD=%2 )
+IF "%3"=="" ( SET BRANCH=developerbuild ) ELSE ( SET BRANCH=%3 )
+
+REM Build the C# solution.
+set Logger="trx"
+
+REM Build the C# solution.
+powershell "%CD%\build\build.ps1" -configuration %Configuration% -logger %Logger%
 IF %errorlevel% NEQ 0 EXIT /B %errorlevel%
 
+REM Build the JavaScript solution.
 yarn --cwd src/EPiServer.Labs.BlockEnhancements/React build
 IF %errorlevel% NEQ 0 EXIT /B %errorlevel%
+cd ..\
 
 EXIT /B %ERRORLEVEL%

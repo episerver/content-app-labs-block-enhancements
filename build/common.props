@@ -1,0 +1,19 @@
+<Project>
+    <Import Project="sign.props" />
+    <Import Project="version.props" />
+    <PropertyGroup>
+        <Product Condition=" '$(Product)' == '' ">Episerver Content Manager</Product>
+        <Description Condition=" '$(Description)' == '' ">Episerver Lighweight Web Content Management System</Description>
+        <Company>Episerver AB</Company>
+        <Authors>Episerver AB</Authors>
+        <Copyright>© 2003-2021 by Episerver AB. All rights reserved</Copyright>
+        <PackageProjectUrl>https://www.optimizely.com/web-content-management/</PackageProjectUrl>
+        <PackageLicenseUrl>https://www.optimizely.com/eula/</PackageLicenseUrl>
+        <PackageTags>EPiServer CMS</PackageTags>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+        <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    </PropertyGroup>
+</Project>
