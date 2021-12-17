@@ -1,10 +1,8 @@
 ﻿using EPiServer.Shell;
 using Microsoft.AspNetCore.Mvc;
-// using PlugInArea = EPiServer.PlugIn.PlugInArea;
 
 namespace EPiServer.Labs.BlockEnhancements
 {
-    //TODO [GuiPlugIn(Area = PlugInArea.AdminMenu, UrlFromModuleFolder = "LocalContentAnalyzerPlugin", DisplayName = "Local content analyzer")]
     public class LocalContentAnalyzerPluginController : Controller
     {
         [HttpGet]

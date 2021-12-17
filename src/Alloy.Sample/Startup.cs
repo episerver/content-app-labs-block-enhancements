@@ -8,7 +8,7 @@ using EPiServer.Cms.UI.AspNetIdentity;
 using EPiServer.Cms.UI.VisitorGroups;
 using EPiServer.Data;
 using EPiServer.Framework.Web.Resources;
-// using EPiServer.Labs.BlockEnhancements;
+using EPiServer.Labs.BlockEnhancements;
 using EPiServer.Scheduler;
 using EPiServer.Web.Mvc.Html;
 using EPiServer.Web.Routing;
@@ -75,7 +75,7 @@ namespace Alloy.Sample
                 .AddVisitorGroupsUI()
                 .AddTinyMce();
 
-            // services.AddBlockEnhancements();
+            services.AddBlockEnhancements();
             services.AddEmbeddedLocalization<Startup>();
         }
 

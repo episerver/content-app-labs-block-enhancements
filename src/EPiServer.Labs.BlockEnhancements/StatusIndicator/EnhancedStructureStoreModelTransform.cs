@@ -1,6 +1,6 @@
-// using EPiServer.Cms.Shell.UI.Rest;
-
+using System.Linq;
 using EPiServer.Cms.Shell.UI.Rest;
+using EPiServer.Cms.Shell.UI.Rest.Capabilities;
 using EPiServer.Cms.Shell.UI.Rest.Models.Internal;
 using EPiServer.Cms.Shell.UI.Rest.Models.Transforms;
 using EPiServer.Core;
@@ -9,6 +9,37 @@ using EPiServer.Web.Routing;
 
 namespace EPiServer.Labs.BlockEnhancements.StatusIndicator
 {
+    //TODO: restore after upgrading to 12.3.0
+    /// <summary>
+    /// Determines if <see cref="IContent"/> is in "For this page" folder
+    /// </summary>
+    [ServiceConfiguration(typeof(IContentCapability))]
+    internal class LocalContentCapability : IContentCapability
+    {
+        private readonly IContentLoader _contentLoader;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LocalContentCapability"/> class.
+        /// </summary>
+        public LocalContentCapability(IContentLoader contentLoader)
+        {
+            _contentLoader = contentLoader;
+        }
+
+        /// <inheritdoc />
+        public string Key => "isLocalContent";
+
+        /// <inheritdoc />
+        public bool IsCapable(IContent content)
+        {
+            return _contentLoader.GetAncestors(content.ContentLink).Any(x =>
+                x is ContentAssetFolder folder && folder.ContentOwnerID != System.Guid.Empty);
+        }
+
+        /// <inheritdoc />
+        public int SortOrder => 10;
+    }
+
     [ServiceConfiguration(typeof(IModelTransform), Lifecycle = ServiceInstanceScope.Singleton)]
     public class EnhancedStructureStoreModelTransform : TransformBase<EnhancedStructureStoreContentDataModel>
     {

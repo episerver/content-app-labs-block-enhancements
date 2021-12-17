@@ -20,6 +20,7 @@ namespace EPiServer.Labs.BlockEnhancements
         public bool HideForThisFolder { get; set; } = true;
         public bool LocalContentFeatureEnabled { get; set; } = true;
         public bool AllowQuickEditOnSharedBlocks { get; set; } = false;
+        public bool LocalBlockConverterEnabled { get; set; } = true;
 
         public IEnumerable<string> IgnoredBlockTypeIdentifiersOnQuickEdit { get; private set; } = new []
         {

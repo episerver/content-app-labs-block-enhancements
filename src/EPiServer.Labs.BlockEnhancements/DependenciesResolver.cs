@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace EPiServer.Labs.BlockEnhancements
 {
+    [ServiceConfiguration]
     public class DependenciesResolver
     {
         private readonly IContentLoader _contentLoader;

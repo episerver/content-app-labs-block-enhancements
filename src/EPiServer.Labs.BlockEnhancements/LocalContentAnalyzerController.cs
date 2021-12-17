@@ -135,7 +135,7 @@ namespace EPiServer.Labs.BlockEnhancements
                     Name = content.Name,
                     TypeIdentifier = content.GetOriginalType().Name,
                     TreePath = GetTreePath(content),
-                    Uri = new Uri(PageEditing.GetEditUrl(content.ContentLink))
+                    Uri = new Uri(PageEditing.GetEditUrl(content.ContentLink), UriKind.Relative)
                 };
 
                 if (content is IChangeTrackable changeTrackable)

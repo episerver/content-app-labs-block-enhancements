@@ -20,7 +20,7 @@ namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
         public void ConfigureContainer(ServiceConfigurationContext context)
         {
             // context.Services.Intercept<ProjectLoaderService>(
-            //     (locator, defaultProjectLoaderService) => new CustomProjectLoaderService(defaultProjectLoaderService,
+            //     (_, defaultProjectLoaderService) => new CustomProjectLoaderService(defaultProjectLoaderService,
             //         ServiceLocator.Current.GetInstance<ProjectRepository>(),
             //         ServiceLocator.Current.GetInstance<CurrentProject>(),
             //         ServiceLocator.Current.GetInstance<ContentLoaderService>(),
@@ -29,7 +29,7 @@ namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
             //         ServiceLocator.Current.GetInstance<LocalBlockResolver>()));
             //
             // context.Services.Intercept<ProjectService>(
-            //     (locator, defaultProjectService) => new CustomProjectService(defaultProjectService,
+            //     (_, defaultProjectService) => new CustomProjectService(defaultProjectService,
             //         ServiceLocator.Current.GetInstance<ProjectRepository>(),
             //         ServiceLocator.Current.GetInstance<ProjectPublisher>(),
             //         ServiceLocator.Current.GetInstance<ContentService>(),
@@ -42,11 +42,11 @@ namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
             //         ServiceLocator.Current.GetInstance<LocalizationService>(),
             //         ServiceLocator.Current.GetInstance<LocalBlockResolver>()));
             //
-            // context.Services.Intercept<PushMessenger>(
-            //     (locator, defaultPushMessenger) => new CustomPushMessenger(defaultPushMessenger,
-            //         ServiceLocator.Current.GetInstance<LocalBlockResolver>(),
-            //         ServiceLocator.Current.GetInstance<ProjectService>(),
-            //         ServiceLocator.Current.GetInstance<BlockEnhancementsOptions>()));
+            context.Services.Intercept<PushMessenger>(
+                (_, defaultPushMessenger) => new CustomPushMessenger(defaultPushMessenger,
+                    ServiceLocator.Current.GetInstance<LocalBlockResolver>(),
+                    ServiceLocator.Current.GetInstance<ProjectService>(),
+                    ServiceLocator.Current.GetInstance<BlockEnhancementsOptions>()));
         }
 
         public void Initialize(InitializationEngine context)

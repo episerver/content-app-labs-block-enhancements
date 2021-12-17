@@ -14,17 +14,17 @@ namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
     {
         public void Initialize(InitializationEngine context)
         {
-            var metadataHandlerRegistry = context.Locate.Advanced.GetInstance<MetadataHandlerRegistry>();
-            var options = context.Locate.Advanced.GetInstance<BlockEnhancementsOptions>();
-            var moduleTable = context.Locate.Advanced.GetInstance<ModuleTable>();
-
-            var isContentManagerModuleAdded = moduleTable.TryGetModule(this.GetType().Assembly, out _);
-            if (isContentManagerModuleAdded)
-            {
-                metadataHandlerRegistry.RegisterMetadataHandler(typeof(ContentArea),
-                    context.Locate.Advanced.GetInstance<ContentAreaDescriptor>(), options.ContentAreaSettings.UIHint,
-                    options.ContentAreaSettings.ContentAreaEditorDescriptorBehavior);
-            }
+            // var metadataHandlerRegistry = context.Locate.Advanced.GetInstance<MetadataHandlerRegistry>();
+            // var options = context.Locate.Advanced.GetInstance<BlockEnhancementsOptions>();
+            // var moduleTable = context.Locate.Advanced.GetInstance<ModuleTable>();
+            //
+            // var isContentManagerModuleAdded = moduleTable.TryGetModule(this.GetType().Assembly, out _);
+            // if (isContentManagerModuleAdded)
+            // {
+            //     metadataHandlerRegistry.RegisterMetadataHandler(typeof(ContentArea),
+            //         context.Locate.Advanced.GetInstance<ContentAreaDescriptor>(), options.ContentAreaSettings.UIHint,
+            //         options.ContentAreaSettings.ContentAreaEditorDescriptorBehavior);
+            // }
         }
 
         void IInitializableModule.Uninitialize(InitializationEngine context) { }
