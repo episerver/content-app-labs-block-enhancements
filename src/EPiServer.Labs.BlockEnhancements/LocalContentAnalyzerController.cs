@@ -156,23 +156,39 @@ namespace EPiServer.Labs.BlockEnhancements
         }
 
         [HttpPost]
-        public ActionResult MoveToLocalFolder(Dto dto)
+        public ActionResult MoveToLocalFolder([FromBody] SingleDto dto)
         {
-            var references = GetUniqueReferences(dto.ContentLink);
+            var contentLink = ContentReference.Parse(dto.ContentLink);
+            Move(contentLink);
+            return new EmptyResult();
+        }
+
+        [HttpPost]
+        public ActionResult MoveAllToLocalFolder([FromBody] MultipleDto dto)
+        {
+            foreach (var contentReference in dto.ContentLinks.Select(ContentReference.Parse))
+            {
+                Move(contentReference);
+            }
+            return new EmptyResult();
+        }
+
+        private void Move(ContentReference contentLink)
+        {
+            var references = GetUniqueReferences(contentLink);
             if (references.Count != 1)
             {
-                return new RestStatusCodeResult(HttpStatusCode.BadRequest);
+                return;
             }
 
             var ownerId = references.FirstOrDefault()?.OwnerID;
             if (ownerId == null)
             {
-                return new RestStatusCodeResult(HttpStatusCode.BadRequest);
+                return;
             }
 
             var targetForThisFolder = _contentAssetHelper.GetOrCreateAssetFolder(ownerId)?.ContentLink;
-            _contentRepository.Move(dto.ContentLink, targetForThisFolder, AccessLevel.NoAccess, AccessLevel.NoAccess);
-            return new EmptyResult();
+            _contentRepository.Move(contentLink, targetForThisFolder, AccessLevel.NoAccess, AccessLevel.NoAccess);
         }
 
         private IEnumerable<string> GetTreePath(IContent content)
@@ -193,9 +209,14 @@ namespace EPiServer.Labs.BlockEnhancements
         }
     }
 
-    public class Dto
+    public class SingleDto
     {
-        public ContentReference ContentLink { get; set; }
+        public string ContentLink { get; set; }
+    }
+
+    public class MultipleDto
+    {
+        public IEnumerable<string> ContentLinks { get; set; }
     }
 
     public static class EnumerableExtensions
