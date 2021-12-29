@@ -5,3 +5,5 @@ modules/_protected/EPiServer.Cms.UI.Settings/**
 modules/_protected/EPiServer.Cms.UI.VisitorGroups/**
 modules/_protected/episerver-telemetry-ui/**
 modules/_protected/Shell/**
+wwwroot/css/css.min.css
+wwwroot/js/script.min.js
