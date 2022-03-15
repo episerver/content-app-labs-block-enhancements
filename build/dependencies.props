@@ -1,9 +1,9 @@
 <Project>
     <PropertyGroup>
-        <CmsCoreVersion>12.2.0-pre-021346</CmsCoreVersion>
-        <CmsUIVersion>12.2.1</CmsUIVersion>
+        <CmsCoreVersion>12.4.1</CmsCoreVersion>
+        <CmsUIVersion>12.3.2</CmsUIVersion>
         <TelemetryVersion>2.0.1</TelemetryVersion>
-        <TinyMceVersion>3.0.1</TinyMceVersion>
+        <TinyMceVersion>3.1.0</TinyMceVersion>
     </PropertyGroup>
 
     <ItemGroup>
