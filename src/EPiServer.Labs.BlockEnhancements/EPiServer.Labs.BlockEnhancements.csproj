@@ -243,7 +243,9 @@
     <Content Include="ClientResources\inline-editing\Block.html" />
     <Content Include="ClientResources\inline-editing\commands\inline-translate.js" />
     <Content Include="ClientResources\inline-editing\commands\update-translate-command.js" />
+    <Content Include="ClientResources\inline-editing\FormEditing.js" />
     <Content Include="ClientResources\inline-editing\initializer.js" />
+    <Content Include="ClientResources\inline-editing\OnPageEditing.js" />
     <Content Include="ClientResources\inline-editing\SharedBlocks.initializer.js" />
     <Content Include="ClientResources\publish-page-with-blocks\command-provider.js" />
     <Content Include="ClientResources\publish-page-with-blocks\command.js" />
