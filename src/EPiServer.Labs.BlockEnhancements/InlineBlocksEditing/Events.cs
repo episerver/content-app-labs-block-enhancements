@@ -4,6 +4,7 @@ using System.Linq;
 using EPiServer.Cms.Shell;
 using EPiServer.Cms.Shell.UI.Rest;
 using EPiServer.Core;
+using EPiServer.Core.Html.StringParsing;
 using EPiServer.Data.Entity;
 using EPiServer.DataAbstraction;
 using EPiServer.DataAccess;
@@ -134,6 +135,7 @@ namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
 
             var projectId = GetProjectIdForContentLink(content.ContentLink);
 
+            var contentItemsToPublish = new List<ContentReference>();
             foreach (var propertyData in content.Property.Where(x => x.PropertyValueType == typeof(ContentArea)))
             {
                 var contentArea = (ContentArea) propertyData.Value;
@@ -150,27 +152,88 @@ namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
                         continue;
                     }
 
-                    var draft = _latestContentVersionResolver.GetDraftLink(contentAreaItem.ContentLink, projectId);
-                    if (draft == null)
-                    {
-                        continue;
-                    }
-
-                    var item = _contentLoader.Get<IContent>(draft);
-                    PublishLocalContentItems(item, contentReferences, true);
-
-                    if ((item as IVersionable)?.Status != VersionStatus.CheckedOut)
-                    {
-                        continue;
-                    }
-
-                    if (item is IReadOnly readOnly)
-                    {
-                        item = (IContent)readOnly.CreateWritableClone();
-                    }
-
-                    _contentLoader.Save(item, SaveAction.Publish, AccessLevel.NoAccess);
+                    contentItemsToPublish.Add(contentAreaItem.ContentLink);
                 }
+            }
+
+            foreach (var propertyData in content.Property.Where(x => x.PropertyValueType == typeof(ContentReference)))
+            {
+                var contentLink = (ContentReference) propertyData.Value;
+                if (contentLink == null)
+                {
+                    continue;
+                }
+
+                var isLocalAsset = _contentLoader.IsLocalContent(contentLink);
+                if (!isLocalAsset)
+                {
+                    continue;
+                }
+
+                contentItemsToPublish.Add(contentLink);
+            }
+
+            foreach (var propertyData in content.Property.Where(x => x.PropertyValueType == typeof(IEnumerable<ContentReference>)))
+            {
+                var contentLink = (ContentReference) propertyData.Value;
+                if (contentLink == null)
+                {
+                    continue;
+                }
+
+                var isLocalAsset = _contentLoader.IsLocalContent(contentLink);
+                if (!isLocalAsset)
+                {
+                    continue;
+                }
+
+                contentItemsToPublish.Add(contentLink);
+            }
+
+            foreach (var propertyData in content.Property.Where(x => x.PropertyValueType == typeof(XhtmlString)))
+            {
+                var xhtmlString = (XhtmlString) propertyData.Value;
+                if (xhtmlString == null)
+                {
+                    continue;
+                }
+
+                var contentFragments = xhtmlString.Fragments.GetFilteredFragments().OfType<ContentFragment>();
+
+                foreach (var contentFragment in contentFragments)
+                {
+                    var isLocalAsset = _contentLoader.IsLocalContent(contentFragment.ContentLink);
+                    if (!isLocalAsset)
+                    {
+                        continue;
+                    }
+
+                    contentItemsToPublish.Add(contentFragment.ContentLink);
+                }
+            }
+
+            foreach (var contentReference in contentItemsToPublish.Select(x => x.ToReferenceWithoutVersion()).Distinct())
+            {
+                var draft = _latestContentVersionResolver.GetDraftLink(contentReference, projectId);
+                if (draft == null)
+                {
+                    continue;
+                }
+
+                var item = _contentLoader.Get<IContent>(draft);
+                PublishLocalContentItems(item, contentReferences, true);
+
+                if ((item as IVersionable)?.Status != VersionStatus.CheckedOut)
+                {
+                    continue;
+                }
+
+                if (item is IReadOnly readOnly)
+                {
+                    item = (IContent)readOnly.CreateWritableClone();
+                }
+
+                _contentLoader.Save(item, SaveAction.Publish, AccessLevel.NoAccess);
             }
         }
 
