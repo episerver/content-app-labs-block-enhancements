@@ -6,7 +6,9 @@ using EPiServer.Core;
 using EPiServer.Data;
 using EPiServer.Data.Dynamic;
 using EPiServer.ServiceLocation;
+using EPiServer.Shell;
 using EPiServer.Web.Routing;
+using Microsoft.AspNetCore.Http;
 
 namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
 {

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Button, Table, Typography } from "optimizely-oui";
-import { Simulate } from "react-dom/test-utils";
+import { Button, Table, Typography, ProgressDots } from "optimizely-oui";
 
 interface ListProps {
     searchText: string;
@@ -11,6 +10,7 @@ interface ListProps {
 export function List({ searchText, maxItemsToDisplay }: ListProps) {
     const [itemsToConvert, setItemsToConvert] = useState<any[]>();
     const [loadingItems, setLoadingItems] = useState(false);
+    const [conversionInProgress, setConversionInProgress] = useState(false);
 
     const reloadItems = () => {
         setLoadingItems(true);
@@ -28,15 +28,14 @@ export function List({ searchText, maxItemsToDisplay }: ListProps) {
         reloadItems();
     }, [searchText, maxItemsToDisplay]);
 
-    const doConvert = (contentLink: string) => {
-        return axios.post("/LocalContentAnalyzer/MoveToLocalFolder", {
-            contentLink: contentLink
-        });
-    };
-
     const convert = (contentLink: string) => {
-        doConvert(contentLink).then(() => {
+        setConversionInProgress(true);
+        axios.post("/LocalContentAnalyzer/MoveToLocalFolder", {
+            contentLink: contentLink
+        }).then(() => {
             reloadItems();
+        }).finally(() => {
+            setConversionInProgress(false);
         });
     };
 
@@ -45,10 +44,19 @@ export function List({ searchText, maxItemsToDisplay }: ListProps) {
             return;
         }
 
-        Promise.all(itemsToConvert.map(item => doConvert(item.contentLink))).then(() => {
+        setConversionInProgress(true);
+        axios.post("/LocalContentAnalyzer/MoveAllToLocalFolder", {
+            contentLinks: itemsToConvert.map(x => x.contentLink)
+        }).then(() => {
             reloadItems();
+        }).finally(() => {
+            setConversionInProgress(false);
         });
     };
+
+    if (conversionInProgress) {
+        return <ProgressDots/>;
+    }
 
     if (itemsToConvert === undefined || loadingItems) {
         return (

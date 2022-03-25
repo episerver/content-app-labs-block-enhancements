@@ -5,7 +5,6 @@ using EPiServer.Cms.Shell.UI.Rest.Projects;
 using EPiServer.Cms.Shell.UI.Rest.Projects.Internal;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
-using EPiServer.Framework.Configuration;
 using EPiServer.Shell.Services.Rest;
 
 namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
@@ -18,8 +17,8 @@ namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
         public CustomProjectLoaderService(ProjectLoaderService defaultProjectLoaderService,
             ProjectRepository projectRepository, CurrentProject currentProject,
             ContentLoaderService contentLoaderService, ISiteConfigurationRepository siteConfigurationRepository,
-            IConfigurationSource configurationSource, LocalBlockResolver localBlockResolver) : base(projectRepository,
-            currentProject, contentLoaderService, siteConfigurationRepository, configurationSource)
+            ProjectUIOptions projectUiOptions, LocalBlockResolver localBlockResolver) : base(projectRepository,
+            currentProject, contentLoaderService, siteConfigurationRepository, projectUiOptions)
         {
             _defaultProjectLoaderService = defaultProjectLoaderService;
             _localBlockResolver = localBlockResolver;

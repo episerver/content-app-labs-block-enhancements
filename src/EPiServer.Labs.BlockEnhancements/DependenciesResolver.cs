@@ -15,9 +15,11 @@ using EPiServer.Globalization;
 using EPiServer.ServiceLocation;
 using EPiServer.Shell;
 using EPiServer.Web;
+using Microsoft.AspNetCore.Http;
 
 namespace EPiServer.Labs.BlockEnhancements
 {
+    [ServiceConfiguration]
     public class DependenciesResolver
     {
         private readonly IContentLoader _contentLoader;
@@ -26,7 +28,7 @@ namespace EPiServer.Labs.BlockEnhancements
         private readonly ContentSoftLinkIndexer _contentSoftLinkIndexer;
         private readonly ServiceAccessor<SiteDefinition> _currentSiteDefinition;
         private readonly UIDescriptorRegistry _uiDescriptorRegistry;
-        private readonly ServiceAccessor<HttpContextBase> _httpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ApprovalResolver _approvalResolver;
         private readonly LocalizationService _localizationService;
         private readonly BlockEnhancementsOptions _blockEnhancementsOptions;
@@ -34,7 +36,7 @@ namespace EPiServer.Labs.BlockEnhancements
         public DependenciesResolver(ContentSoftLinkIndexer contentSoftLinkIndexer, IContentLoader contentLoader,
             LanguageResolver languageResolver, ContentLoaderService contentLoaderService,
             ServiceAccessor<SiteDefinition> currentSiteDefinition, UIDescriptorRegistry uiDescriptorRegistry,
-            ServiceAccessor<HttpContextBase> httpContextAccessor,
+            IHttpContextAccessor httpContextAccessor,
             ApprovalResolver approvalResolver, LocalizationService localizationService,
             BlockEnhancementsOptions blockEnhancementsOptions)
         {
@@ -127,7 +129,7 @@ namespace EPiServer.Labs.BlockEnhancements
             var directDependencies = GetLanguageAgnosticDependencies(root).ToList();
             var you = _localizationService.GetStringByCulture("/episerver/shared/text/yousubject",
                 CultureInfo.CurrentCulture);
-            var currentUser = _httpContextAccessor()?.User?.Identity?.Name;
+            var currentUser = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
             foreach (var directDependency in directDependencies)
             {
                 var content = _contentLoader.Get<IContent>(directDependency);

@@ -3,16 +3,17 @@ using EPiServer.Framework.Initialization;
 using EPiServer.ServiceLocation;
 using EPiServer.Shell;
 using EPiServer.Web;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EPiServer.Labs.BlockEnhancements.InlineBlocksEditing
 {
-    [ModuleDependency(typeof(Web.InitializationModule))]
+    [ModuleDependency(typeof(InitializationModule))]
     public class DraftContentAreaPreviewInitializerInitializer : IConfigurableModule
     {
         public void ConfigureContainer(ServiceConfigurationContext context)
         {
             context.Services.Intercept<IContentAreaLoader>(
-                (locator, defaultContentAreaLoader) => new CustomContentAreaLoader(defaultContentAreaLoader,
+                (_, defaultContentAreaLoader) => new CustomContentAreaLoader(defaultContentAreaLoader,
                     ServiceLocator.Current.GetInstance<IContextModeResolver>(),
                     ServiceLocator.Current.GetInstance<IContentVersionMapper>()));
 

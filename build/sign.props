@@ -1,0 +1,7 @@
+<Project>
+    <PropertyGroup>
+        <DelaySign>true</DelaySign>
+        <AssemblyOriginatorKeyFile>$(SolutionDir)/EPiServerProduct_PublicKey.snk</AssemblyOriginatorKeyFile>
+        <SignAssembly>true</SignAssembly>
+    </PropertyGroup>
+</Project>

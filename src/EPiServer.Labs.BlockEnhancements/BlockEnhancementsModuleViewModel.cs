@@ -14,21 +14,13 @@ namespace EPiServer.Labs.BlockEnhancements
     [Options]
     public class BlockEnhancementsOptions
     {
-        private readonly UIDescriptorRegistry _uiDescriptorRegistry;
-        private readonly IContentTypeRepository _contentTypeRepository;
-
-        public BlockEnhancementsOptions(UIDescriptorRegistry uiDescriptorRegistry, IContentTypeRepository contentTypeRepository)
-        {
-            _uiDescriptorRegistry = uiDescriptorRegistry;
-            _contentTypeRepository = contentTypeRepository;
-        }
-
         public bool StatusIndicator { get; set; } = true;
         public bool PublishPageWithBlocks { get; set; } = false;
         public bool InlineTranslate { get; set; } = false;
         public bool HideForThisFolder { get; set; } = true;
         public bool LocalContentFeatureEnabled { get; set; } = true;
         public bool AllowQuickEditOnSharedBlocks { get; set; } = false;
+        public bool LocalBlockConverterEnabled { get; set; } = true;
 
         public IEnumerable<string> IgnoredBlockTypeIdentifiersOnQuickEdit { get; private set; } = new []
         {
@@ -39,16 +31,19 @@ namespace EPiServer.Labs.BlockEnhancements
         {
             set
             {
+                var uiDescriptorRegistry = ServiceLocator.Current.GetInstance<UIDescriptorRegistry>();
+                var contentTypeRepository = ServiceLocator.Current.GetInstance<IContentTypeRepository>();
+
                 if (value == null)
                 {
                     return;
                 }
 
-                var contentTypesToIgnore = value.Select(x => _contentTypeRepository.Load(x));
+                var contentTypesToIgnore = value.Select(x => contentTypeRepository.Load(x));
 
                 var ignoredTypeIdentifiers = contentTypesToIgnore
                     .Select(x =>
-                        _uiDescriptorRegistry
+                        uiDescriptorRegistry
                             .GetTypeIdentifiers(x.ModelType ??
                                                 ((x is PageType) ? typeof(PageData) : typeof(IContentData)))
                             .FirstOrDefault())

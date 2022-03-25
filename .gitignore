@@ -27,7 +27,6 @@ License.config
 node_modules/
 
 *.nupkg
-episerver-labs-block-enhancements.zip
 
 out/
 dist/

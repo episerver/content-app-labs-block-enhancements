@@ -1,5 +1,5 @@
-﻿using System.Web.Mvc;
-using EPiServer.Shell.Services.Rest;
+﻿using EPiServer.Shell.Services.Rest;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EPiServer.Labs.BlockEnhancements
 {
@@ -15,9 +15,7 @@ namespace EPiServer.Labs.BlockEnhancements
 
         public ActionResult Get()
         {
-            var actionResult = Rest(_blockEnhancementsOptions);
-            actionResult.SafeResponse = true;
-            return actionResult;
+            return Rest(_blockEnhancementsOptions);
         }
     }
 }

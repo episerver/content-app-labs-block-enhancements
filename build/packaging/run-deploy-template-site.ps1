@@ -1,11 +1,11 @@
 Param(
-    $SiteName = "block-enhancements-test",
-    # $SitePath = "$SiteRoot\$SiteName",
-    $PackageName = "Alloy.Sample.BlockEnhancements",
-    $PackageVersion = "7.6.0-ci-30",
+    $SiteName = "FROM_TC_BUILD",
+    $SitePath = "FROM_TC_BUILD",
+    $PackageName = "Alloy.Sample.TinyMce",
+    $PackageVersion = "FROM_TC_BUILD",
     [bool]$DeleteSite = $true,
     [bool]$CreateSite = $true,
-    $NugetFeed = "http://tc01.ep.se/httpAuth/app/nuget/feed/EPiServerCMSUi/cmsui/v1",
+    $NugetFeed = "http://tc01.ep.se/httpAuth/app/nuget/feed/Netcore/netcore/v1",
     $DbServer = "(local)",
     $DbUsername = "Deployer",
     $DbPassword = "aj3YpcmkDVEuLSiL",
@@ -13,13 +13,11 @@ Param(
     $DbSitePassword = "PLeg3BiD9-uJMkpY"
 )
 
-$SiteRoot = "e:\BlockEnhancements"
-$IISSiteName = "Default Web Site\BlockEnhancements"
-
 $SiteName = $SiteName -replace "\W+", "-"
-$SitePath = "$SiteRoot\$SiteName"
-"SiteName: $SiteName"
-"SiteRoot: $SiteRoot"
+$SiteName = "netcore-blockenhancements-$SiteName"
+$SiteName = $SiteName.subString(0, [System.Math]::Min(63, $SiteName.Length))
+$SitePath = "e:\netcore-blockenhancements\$SiteName"
+Write-Host "DEPLOYING ALLOY :: START :: $SiteName :: to :: $SitePath"
 
 $tmpFolder = [System.IO.Path]::GetTempPath() + [guid]::NewGuid().ToString()
 $tmpPackageFolder = "$tmpFolder\$PackageName.$PackageVersion"
@@ -29,6 +27,7 @@ Set-Alias aspnet_regsql (Join-Path $FrameworkDir "aspnet_regsql.exe")
 
 #http://www.iis.net/learn/manage/powershell/powershell-snap-in-creating-web-sites-web-applications-virtual-directories-and-application-pools
 Import-Module WebAdministration
+Import-Module sqlps -DisableNameChecking
 [System.Reflection.Assembly]::LoadWithPartialName("EPiServerInstall.Common.1") | Import-Module  -DisableNameChecking
 
 function Delete-Site {
@@ -37,7 +36,7 @@ function Delete-Site {
         $SitePath
     )
 
-    $site = "IIS:\Sites\$IISSiteName\$SiteName"
+    $site = "IIS:\Sites\$SiteName"
     $appPoolName = "IIS:\AppPools\$SiteName"
 
     if(Test-Path ($appPoolName)) {
@@ -64,7 +63,7 @@ function Create-Site {
     )
 
 
-    $site = "IIS:\Sites\$IISSiteName\$SiteName"
+    $site = "IIS:\Sites\$SiteName"
     $appPoolName = "IIS:\AppPools\$SiteName"
 
     if(!(Test-Path($SitePath))) {
@@ -76,7 +75,7 @@ function Create-Site {
 
     if(!(Test-Path($site))) {
         "Creating site: $site"
-        New-Item $site -type Application -physicalPath "$SitePath\wwwroot"
+        New-Item $site -bindings @{protocol="http";bindingInformation=":80:$SiteName.sh-daily.ep.se"} -physicalPath "$SitePath\wwwroot"
 
         if(!(Test-Path($appPoolName)))
         {
@@ -94,6 +93,28 @@ function Create-Site {
     }
 }
 
+function Deploy-Nuget {
+    param (
+        $TmpFolder,
+        $TmpPackageFolder,
+        $PackageName,
+        $PackageVersion,
+        $SitePath,
+        $NugetFeed
+    )
+
+    $tmpPackageFolderSearch = "$TmpPackageFolder\*"
+
+    #Install the nuget package into the $tmpFolder
+    $command = "nuget install $PackageName -Version $PackageVersion -Prerelease -OutputDirectory $tmpFolder -Source $NugetFeed -NoCache"
+    "Running nuget command $command"
+
+    nuget install $PackageName -Version $PackageVersion -Prerelease -OutputDirectory $tmpFolder -Source $NugetFeed -NoCache
+
+    "Copy the site from $tmpPackageFolderSearch to $SitePath"
+    Copy-Item $tmpPackageFolderSearch -Destination $SitePath -Recurse
+}
+
 function Drop-Database {
     param (
         $SiteName,
@@ -105,7 +126,6 @@ function Drop-Database {
     "Drop database [$SiteName]"
     Invoke-SqlCmd -Query "ALTER DATABASE [$SiteName] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP database [$SiteName]" -ServerInstance $DbServer -Username $DbUserName -Password $DbPassword -ErrorAction SilentlyContinue
 }
-
 
 function Create-Database {
     param (
@@ -128,7 +148,7 @@ function Create-Database {
     aspnet_regsql -S $DbServer -U $DbUsername -P $DbPassword -d $SiteName -A all
 
     "Create tables"
-    $rawSqlScript = Get-ChildItem -Path $TmpPackageFolder\setup\sql\EPiServer.Cms.Core.sql -Recurse | select -last 1
+    $rawSqlScript = Get-ChildItem -Path $TmpPackageFolder\setup\sql\**\EPiServer.Cms.Core.sql -Recurse
     $sqlScript = "$TmpPackageFolder\setup\CreateDatabase.sql"
     Add-Content -Path $sqlScript -Value (Get-Content $rawSqlScript.FullName)
 
@@ -149,26 +169,13 @@ function Transform-Config {
     )
 
     "Transform config files"
-    Update-EPiXmlFile -TargetFilePath "$SitePath\wwwroot\Web.config" -ModificationFilePath "$TmpPackageFolder\Setup\Alloy.Sample.BlockEnhancements.web.config.transform" -Replaces "{basePath}=$SitePath\appData;{DbServer}=$DbServer;{DbDatabase}=$SiteName;{DbUserName}=$DbSiteUser;{DbPassword}=$DbSitePassword;"
-}
+    $appSettingsFile = Get-Content "$SitePath\wwwroot\appsettings.Production.json"
+    $appSettingsFile = $appSettingsFile -replace [regex]::Escape('{DbServer}'), $DbServer
+    $appSettingsFile = $appSettingsFile -replace [regex]::Escape('{DbDatabase}'), $SiteName
+    $appSettingsFile = $appSettingsFile -replace [regex]::Escape('{DbUserName}'), $DbSiteUser
+    $appSettingsFile = $appSettingsFile -replace [regex]::Escape('{DbPassword}'), $DbSitePassword
 
-function Deploy-Nuget {
-    param (
-        $TmpFolder,
-        $TmpPackageFolder,
-        $PackageName,
-        $PackageVersion,
-        $SitePath,
-        $NugetFeed
-    )
-
-    $tmpPackageFolderSearch = "$TmpPackageFolder\*"
-
-    #Install the nuget package into the $tmpFolder
-    nuget install $PackageName -Version $PackageVersion -Prerelease -OutputDirectory $tmpFolder -Source $NugetFeed -NoCache -Verbosity detailed
-
-    "Copy the site from $tmpPackageFolderSearch to $SitePath"
-    Copy-Item $tmpPackageFolderSearch -Destination $SitePath -Recurse
+    Set-Content -Path "$SitePath\wwwroot\appsettings.Production.json" -Value $appSettingsFile
 }
 
 if ($DeleteSite -eq $true) {
@@ -182,6 +189,11 @@ if ($CreateSite -eq $true) {
     Create-Database $tmpPackageFolder $SiteName $DbServer $DbUsername $DbPassword $DbSiteUser $DbSitePassword
     Transform-Config $tmpPackageFolder $SitePath $DbServer $SiteName $DbSiteUser $DbSitePassword
 
+    "Copy license file"
+    Copy-Item "E:\License.config" -Destination "$SitePath\wwwroot"
+
     "Remove temp folder $tmpFolder"
     Remove-Item $tmpFolder -Recurse
 }
+
+Write-Host "DEPLOYING ALLOY :: END"
