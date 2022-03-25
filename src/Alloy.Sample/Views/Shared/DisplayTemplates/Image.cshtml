@@ -1,5 +1,9 @@
-﻿@model EPiServer.Core.ContentReference
+﻿@using EPiServer
+@using EPiServer.ServiceLocation
+@model EPiServer.Core.ContentReference
 @if (Model != null)
 {
-    <img src="@Url.ContentUrl(Model)" alt="" />
+    var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
+    var image = contentRepository.Get<IContent>(Model) as ImageFile;
+    <img src="@Url.ContentUrl(Model)" alt="@image.Name" title="@image.Copyright" />
 }

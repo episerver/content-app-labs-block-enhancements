@@ -14,9 +14,7 @@
 
 @section RelatedContent
 {
-    <div @Html.EditAttributes(x => x.CurrentPage.PageImage)>
-        <img src="@Url.ContentUrl(Model.CurrentPage.PageImage)"/>
-    </div>
+    @Html.PropertyFor(x => x.CurrentPage.PageImage)
 
     <div class="block colorBox @string.Join(" ", @Model.CurrentPage.GetThemeCssClassNames())">
         <h2 @Html.EditAttributes(x => x.CurrentPage.PageName)>@Model.CurrentPage.PageName</h2>

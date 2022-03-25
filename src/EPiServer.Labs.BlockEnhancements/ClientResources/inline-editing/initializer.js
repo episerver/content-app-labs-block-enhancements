@@ -12,8 +12,6 @@ define([
     "epi-cms/core/ContentReference",
     "epi-cms/contentediting/ContentActionSupport",
     "epi-cms/contentediting/ContentViewModel",
-    "epi-cms/contentediting/EditingBase",
-    "epi-cms/contentediting/OnPageEditing",
     "epi-cms/contentediting/RenderManager",
     "epi-cms/contentediting/UpdateController",
     "epi-cms/contentediting/inline-editing/InlineEditBlockDialog",
@@ -36,8 +34,6 @@ define([
     ContentReference,
     ContentActionSupport,
     ContentViewModel,
-    EditingBase,
-    OnPageEditing,
     RenderManager,
     UpdateController,
     InlineEditBlockDialog,
@@ -321,33 +317,6 @@ define([
 
             }
             return def;
-        }
-
-        EditingBase.prototype._updateChangedProperty = function () {
-            this.viewModel.beginOperation();
-            this.viewModel.setProperty("iversionable_changed", new Date(), null);
-        }
-
-        OnPageEditing.prototype._updateChangedProperty = function (propertyName) {
-            this.viewModel.beginOperation();
-            this.viewModel.setProperty("iversionable_changed", new Date(), null);
-
-            var handler = on(this.viewModel, "saved", function (result) {
-                handler.remove();
-
-                if (!result) {
-                    return;
-                }
-                var mapping = this._mappingManager.findOne("propertyName", propertyName);
-                mapping.updateController.contentLink = result.contentLink;
-                mapping.updateController.render(true);
-            }.bind(this));
-        }
-
-        var originalSetViewModelAttr = EditingBase.prototype._setViewModelAttr;
-        EditingBase.prototype._setViewModelAttr = function () {
-            originalSetViewModelAttr.apply(this, arguments);
-            this.ownByKey("updateChangedProperty", topic.subscribe("updateChangedProperty", this._updateChangedProperty.bind(this)));
         }
 
         RenderManager.prototype.renderValue = function (contentLink, propertyName, value, renderSettings, rendererClassName, force) {
