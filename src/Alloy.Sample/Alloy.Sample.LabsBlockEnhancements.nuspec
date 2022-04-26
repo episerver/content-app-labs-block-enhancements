@@ -19,6 +19,6 @@
     <file src="build\packaging\*.sql" target="setup"/>
     <file src="packages\episerver.cms.core\$CmsCoreVersion$\tools\EPiServer.Cms.Core.sql" target="setup\sql\$CmsCoreVersion$"/>
 
-    <file src="src\Alloy.Sample\bin\$configuration$\net5.0\publish\**\*.*" target="wwwroot"/>
+    <file src="src\Alloy.Sample\bin\$configuration$\net6.0\publish\**\*.*" target="wwwroot"/>
   </files>
 </package>
