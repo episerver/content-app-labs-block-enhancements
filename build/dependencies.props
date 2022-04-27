@@ -1,9 +1,9 @@
 <Project>
     <PropertyGroup>
-        <CmsCoreVersion>12.4.1</CmsCoreVersion>
-        <CmsUIVersion>12.3.2</CmsUIVersion>
-        <TelemetryVersion>2.0.1</TelemetryVersion>
-        <TinyMceVersion>3.1.0</TinyMceVersion>
+        <CmsCoreVersion>12.5.0</CmsCoreVersion>
+        <CmsUIVersion>12.5.0</CmsUIVersion>
+        <TelemetryVersion>2.1.0</TelemetryVersion>
+        <TinyMceVersion>3.2.0</TinyMceVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,5 +17,6 @@
         <PackageReference Update="EPiServer.CMS.UI.AspNetIdentity" Version="$(CmsUIVersion)"/>
         <PackageReference Update="EPiServer.CMS.UI.VisitorGroups" Version="$(CmsUIVersion)"/>
         <PackageReference Update="EPiServer.Hosting" Version="$(CmsCoreVersion)"/>
+        <PackageReference Update="EPiServer.Framework" Version="$(CmsCoreVersion)"/>
     </ItemGroup>
 </Project>
