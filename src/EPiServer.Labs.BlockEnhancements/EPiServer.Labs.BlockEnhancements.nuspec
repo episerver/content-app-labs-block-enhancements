@@ -18,16 +18,27 @@
         <dependency id="EPiServer.CMS.UI.Core" version="[$CmsUIVersion$, $CmsUINextMajorVersion$)" />
         <dependency id="EPiServer.Telemetry.UI" version="[$TelemetryVersion$, $TelemetryNextMajorVersion$)" include="all" />
       </group>
+      <group targetFramework="net6.0">
+        <dependency id="EPiServer.CMS.UI.Core" version="[$CmsUIVersion$, $CmsUINextMajorVersion$)" />
+        <dependency id="EPiServer.Telemetry.UI" version="[$TelemetryVersion$, $TelemetryNextMajorVersion$)" include="all" />
+      </group>
     </dependencies>
     <contentFiles>
       <files include="any/any/modules/_protected/episerver-labs-block-enhancements\episerver-labs-block-enhancements.zip" buildAction="None" copyToOutput="true"  />
     </contentFiles>
   </metadata>
   <files>
-	  <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\EPiServer.Labs.BlockEnhancements.dll" target="lib\net5.0\" />
-    <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\EPiServer.Labs.BlockEnhancements.Views.dll" target="lib\net5.0\" />
-    <file src="out\episerver-labs-block-enhancements\episerver-labs-block-enhancements.zip" target="contentFiles\any\any\modules\_protected\episerver-labs-block-enhancements\" />
+	  <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net5.0\EPiServer.Labs.BlockEnhancements.dll" target="lib\net5.0\" />
+	  <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net5.0\EPiServer.Labs.BlockEnhancements.pdb" target="lib\net5.0\" />
+	  <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net5.0\EPiServer.Labs.BlockEnhancements.Views.dll" target="lib\net5.0\" />
+    <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net5.0\EPiServer.Labs.BlockEnhancements.Views.pdb" target="lib\net5.0\" />
     <file src="build\CopyZipFiles.targets" target="build\net5.0\Episerver.Labs.BlockEnhancements.targets" />
+
+    <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net6.0\EPiServer.Labs.BlockEnhancements.dll" target="lib\net6.0\" />
+    <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net6.0\EPiServer.Labs.BlockEnhancements.pdb" target="lib\net6.0\" />
+    <file src="build\CopyZipFiles.targets" target="build\net6.0\Episerver.Labs.BlockEnhancements.targets" />
+
+    <file src="out\episerver-labs-block-enhancements\episerver-labs-block-enhancements.zip" target="contentFiles\any\any\modules\_protected\episerver-labs-block-enhancements\" />
     <file src="src\EPiServer.Labs.BlockEnhancements\readme.txt" target="" />
   </files>
 </package>

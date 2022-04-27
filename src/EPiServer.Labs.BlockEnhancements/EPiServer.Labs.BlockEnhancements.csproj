@@ -2,11 +2,12 @@
   <Import Project="..\..\build\common.props" />
   <Import Project="..\..\build\nuspec.props" />
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
     <NoWarn>NU5125</NoWarn>
     <NuspecFile>EPiServer.Labs.BlockEnhancements.nuspec</NuspecFile>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <OutputType>Library</OutputType>
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EPiServer.CMS.UI.Core" />
@@ -18,5 +19,9 @@
     <Compile Remove="React\node_modules\**" />
     <EmbeddedResource Remove="React\node_modules\**" />
     <None Remove="React\node_modules\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="module.config" />
+    <Content Remove="React\**" />
   </ItemGroup>
 </Project>

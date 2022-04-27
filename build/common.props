@@ -11,7 +11,7 @@
         <PackageLicenseUrl>https://www.optimizely.com/eula/</PackageLicenseUrl>
         <PackageTags>EPiServer CMS</PackageTags>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
         <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
         <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
