@@ -248,3 +248,6 @@ Includes the following `customDimensions`:
 >     - Issues created on GitHub will be triaged, and if accepted, fixed by us
 >
 > The software is provided “As is” without warranty of any kind or promise of support. In no event shall Episerver be liable for any claim, damages or liability in relation to the software. By using this software you are also agreeing to our developer program terms [https://www.episerver.com/legal/program-terms/](https://www.episerver.com/legal/program-terms/)
+
+### GitHub migration
+This repository has been moved to GitHub.
