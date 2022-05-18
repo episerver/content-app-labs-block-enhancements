@@ -80,7 +80,13 @@ foreach ($assembly in $assemblies)
 }
 
 $url = "http://timestamp.digicert.com/scripts/timstamp.dll"
-$cert = (Get-ChildItem -Recurse -File cert:\ | Where-Object {$_.Thumbprint -match "EABEA65470D9B25F92B09C202EB3DED15FD0B0A9"})[0]
+$cert = Get-Cert
+if ($cert -eq $null)
+{
+    Write-Error "No certificate has been found, or it is about to expire"
+    exit 1
+}
+
 foreach($item in $assemblies)
 {
     Write-Host ("Authenticode signing " + $item.FullName)
