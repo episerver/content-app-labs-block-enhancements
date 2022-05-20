@@ -1,0 +1,9 @@
+ Users referenced in this file will automatically be requested as reviewers for PRs that modify the given paths.
+# See https://help.github.com/articles/about-code-owners/
+
+# Default owners for everything in this repo
+# codeowners as a team doesn't work so well with PRs (https://github.com/github/feedback/discussions/5289),
+# so we add individuals instead of cms-ui team
+# * @episerver/cms-ui
+* @gregwiechec @barteksekula @seraph17 @bacepi @banND @trungndtl @habui-epi @Phu-ND @ptz000 @DeepRed @StefanOptimizely @LingSpb
+
