@@ -37,6 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{A1272902
 		build\nuspec.props = build\nuspec.props
 		build\dependencies.props = build\dependencies.props
 		global.json = global.json
+		src\EPiServer.Labs.BlockEnhancements.Test\dojoConfig.js = src\EPiServer.Labs.BlockEnhancements.Test\dojoConfig.js
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPiServer.Labs.BlockEnhancements", "src\EPiServer.Labs.BlockEnhancements\EPiServer.Labs.BlockEnhancements.csproj", "{7D3CB0B4-BF55-4577-ABF2-D83F8EA5D49F}"

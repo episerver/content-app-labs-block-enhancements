@@ -1,8 +1,8 @@
 <Project>
     <PropertyGroup>
         <CmsCoreVersion>12.5.0</CmsCoreVersion>
-        <CmsUIVersion>12.5.0</CmsUIVersion>
-        <TelemetryVersion>2.1.0</TelemetryVersion>
+        <CmsUIVersion>12.6.0</CmsUIVersion>
+        <TelemetryVersion>2.2.0</TelemetryVersion>
         <TinyMceVersion>3.2.0</TinyMceVersion>
     </PropertyGroup>
 

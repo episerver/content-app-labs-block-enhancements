@@ -16,7 +16,6 @@
           <title>Vahvista että haluat julkaista sivun sekä siihen liittyvää sisältöä</title>
         </dialog>
         <ilineediting>
-          <browseexistingitems>valitse sisällöt</browseexistingitems>
           <inlinetranslate>Luo {missingLanguage} kieliversio</inlinetranslate>
         </ilineediting>
       </blockenhancements>

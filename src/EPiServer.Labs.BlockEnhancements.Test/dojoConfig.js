@@ -25,7 +25,7 @@ var dojoConfig = {
         { name: "put-selector", location: "/base/out/dtk/put-selector" },
         { name: "epi", location: "/base/out/dtk/epi" },
         { name: "epi-cms", location: "/base/out/dtk/epi-cms" },
-        { name: "episerver-telemetry-ui", location: "/base/out/dtk/episerver-telemetry-ui/2.1.0/ClientResources" },
+        { name: "episerver-telemetry-ui", location: "/base/out/dtk/episerver-telemetry-ui/2.2.0/ClientResources" },
         { name: "episerver-labs-block-enhancements", location: "/base/src/EPiServer.Labs.BlockEnhancements/ClientResources" },
         { name: "mocks", location: "/base/src/EPiServer.Labs.BlockEnhancements.Test/Mocks" },
         { name: "tdd", location: "/base/src/EPiServer.Labs.BlockEnhancements.Test/tdd"}
