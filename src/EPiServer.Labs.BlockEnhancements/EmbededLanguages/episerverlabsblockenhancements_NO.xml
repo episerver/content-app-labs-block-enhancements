@@ -18,7 +18,6 @@
           <title>Bekreft at du publiserer siden og det relaterte innholdet</title>
         </dialog>
         <ilineediting>
-          <browseexistingitems>velg innhold</browseexistingitems>
           <inlinetranslate>Opprett {missingLanguage} språkversjon</inlinetranslate>
         </ilineediting>
       </blockenhancements>

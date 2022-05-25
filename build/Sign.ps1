@@ -12,37 +12,32 @@ if (!(Test-Path $sn)) {
     exit 1
 }
 
-function Try-GetCert([String]$certFingerprint)
-{
-	$certArray = Get-ChildItem -Recurse -File cert:\ | Where-Object {$_.notafter -ge (get-date).AddDays(30) -AND $_.Thumbprint -match $certFingerprint}
-	if ($certArray -eq $null)
-	{
-		return $null;
-	}
-	return $certArray[0];
-}
-
 function Get-Cert()
 {
-	# First attempt to get cert based on environment variable
-	if (Test-Path env:EPISERVER_CS_CERTIFICATE_THUMBPRINT)
+    # First attempt to get cert based on environment variable
+    if (Test-Path env:EPISERVER_CS_CERTIFICATE_THUMBPRINT)
     {
-		$certFingerprint = (Get-Item env:EPISERVER_CS_CERTIFICATE_THUMBPRINT).Value
-	}
+        $certFingerprint = (Get-Item env:EPISERVER_CS_CERTIFICATE_THUMBPRINT).Value
+    }
     else
-	{
-		# If environment variable is not defined, try new (27th of May 2019) cert fingerprint
-		$certFingerprint = "EABEA65470D9B25F92B09C202EB3DED15FD0B0A9"
-	}
+    {
+        # If environment variable is not defined, try new (27th of May 2019) cert fingerprint
+        $certFingerprint = "EABEA65470D9B25F92B09C202EB3DED15FD0B0A9"
+    }
 
-	$cert = Try-GetCert($certFingerprint)
-	if ($cert -ne $null)
-	{
-		return $cert;
-	}
+    $certificates = Get-ChildItem -Recurse -File cert:\ | Where-Object {$_.Thumbprint -match $certFingerprint}
+    if ($certificates -eq $null)
+    {
+        return $null;
+    }
 
-	# Fallback to old cert
-	return Try-GetCert("5825c5ccf7fa5195f0a11f7a144d3e13922c7047")
+    $almostExpiredCertificates = Get-ChildItem -Recurse -File cert:\ | Where-Object {$_.notafter -ge (get-date).AddDays(30) -AND $_.Thumbprint -match $certFingerprint}
+    if ($almostExpiredCertificates -eq $null)
+    {
+        Write-Host "##teamcity[message text='WARNING! The certificate will expire in less than a month! Please talk to the IT to order a new certificate.' status='WARNING']"
+    }
+
+    return $certificates[0];
 }
 
 $rootDir = Get-Location
@@ -70,17 +65,23 @@ Write-Host "Signing assemblies"
 $signError = $false
 foreach ($assembly in $assemblies)
 {
-   Write-Host (" Signing " + $assembly.FullName)
-   $LASTEXITCODE = 0
-   &"$WindowsSDKPath\sn.exe" -q -Rc  $assembly.FullName "EPiServerProduct"
-   if ($LASTEXITCODE -ne 0)
-   {
-       exit $LASTEXITCODE
-   }
+    Write-Host (" Signing " + $assembly.FullName)
+    $LASTEXITCODE = 0
+    &"$WindowsSDKPath\sn.exe" -q -Rc  $assembly.FullName "EPiServerProduct"
+    if ($LASTEXITCODE -ne 0)
+    {
+        exit $LASTEXITCODE
+    }
 }
 
 $url = "http://timestamp.digicert.com/scripts/timstamp.dll"
-$cert = (Get-ChildItem -Recurse -File cert:\ | Where-Object {$_.Thumbprint -match "EABEA65470D9B25F92B09C202EB3DED15FD0B0A9"})[0]
+$cert = Get-Cert
+if ($cert -eq $null)
+{
+    Write-Error "No certificate has been found"
+    exit 1
+}
+
 foreach($item in $assemblies)
 {
     Write-Host ("Authenticode signing " + $item.FullName)

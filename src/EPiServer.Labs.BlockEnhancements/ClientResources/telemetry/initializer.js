@@ -9,8 +9,6 @@ define([
         patchCmsCommands();
 
         var trackingOptions = Object.assign({}, options);
-        trackingOptions.contentAreaBrowse = trackingOptions.contentAreaSettings.contentAreaBrowse;
-        delete trackingOptions.contentAreaSettings;
 
         tracker.trackEvent("featureOptions", trackingOptions);
     };

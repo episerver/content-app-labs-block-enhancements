@@ -13,7 +13,6 @@ define([
     "epi-cms/widget/overlay/Block",
     "epi-cms/widget/command/CreateContentFromSelector",
     "epi-cms/contentediting/command/ContentAreaCommands",
-    "episerver-labs-block-enhancements/editors/browsable-content-area-mixin",
     "episerver-labs-block-enhancements/inline-editing/commands/update-translate-command",
     "dojo/text!../inline-editing/Block.html"
 ], function (
@@ -31,7 +30,6 @@ define([
     Block,
     CreateContentFromSelector,
     ContentAreaCommands,
-    browsableContentAreaMixin,
     updateInlineTranslateCommands,
     template
 ) {
@@ -103,7 +101,7 @@ define([
             }
         },
     });
-    return declare([ContentArea, browsableContentAreaMixin], {
+    return declare([ContentArea], {
         blockEnhancementsOptions: {},
         blockClass: CustomBlockClass,
 
