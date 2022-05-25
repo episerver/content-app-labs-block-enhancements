@@ -18,7 +18,6 @@
           <title>Bekräfta att du publicerar sidan och relaterat innehåll</title>
         </dialog>
         <ilineediting>
-          <browseexistingitems>välj innehåll</browseexistingitems>
           <inlinetranslate>Skapa {missingLanguage} språkversion</inlinetranslate>
         </ilineediting>
       </blockenhancements>

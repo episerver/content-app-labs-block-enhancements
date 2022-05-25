@@ -108,11 +108,7 @@ public class CustomBlockEnhancementsModule : IConfigurableModule
         context.Services.Configure<BlockEnhancementsOptions>(options =>
         {
             options.LocalContentFeatureEnabled = false;            
-            options.StatusIndicator = false;
-            options.ContentAreaSettings = new ContentAreaSettings
-                {
-                    ContentAreaBrowse = true
-                };
+            options.StatusIndicator = false;            
             options.InlineTranslate = true;
         });
     }
@@ -140,8 +136,7 @@ public class CustomBlockEnhancementsModule : IConfigurableModule
 ### ContentAreaSettings
 
  | Option        | Default           | Description  |
- | ---- | ---- | ---- |
- | ContentAreaBrowse | true | Allow editors to browse content directly from Content Area |
+ | ---- | ---- | ---- | 
  | ContentAreaEditorDescriptorBehavior | EditorDescriptorBehavior.OverrideDefault | Should the custom ContentArea override the default |
  | UIHint | null | Custom UIHint, only necessary if DescriptorBehavior is not the default one |
  
@@ -207,7 +202,6 @@ Additionally we are tracking:
 
 Includes keys in `customDimensions` that correspond to a feature, and the value is a `boolean` (where `true` means the feature is enabled):
 
-* `contentAreaBrowse`: Extra button in the content area that [displays the content selector](assets/docsimages/create_new_nested_block.gif) for [Inline Create](#inline-create).
 * `hideForThisFolder`: Do not show `For this page` folder in Blocks Asset Pane
 * `localContentFeatureEnabled`: [Local content](#local-content)
 * `inlineTranslate`: [Inline translate](#translate)

@@ -4,7 +4,6 @@ define([
     "dojo/topic",
     "epi-cms/core/ContentReference",
     "epi-cms/widget/command/CreateContentFromSelector",
-    "episerver-labs-block-enhancements/editors/browsable-content-area-mixin",
     "epi-cms/contentediting/editors/ContentAreaEditor",
     "episerver-labs-block-enhancements/inline-editing/commands/update-translate-command"
 ], function (
@@ -13,11 +12,10 @@ define([
     topic,
     ContentReference,
     CreateContentFromSelector,
-    browsableContentAreaMixin,
     ContentAreaEditor,
     updateInlineTranslateCommands
 ) {
-    return declare([ContentAreaEditor, browsableContentAreaMixin], {
+    return declare([ContentAreaEditor], {
         blockEnhancementsOptions: {},
 
         update: function (value) {

@@ -67,11 +67,6 @@ namespace EPiServer.Labs.BlockEnhancements
     public class ContentAreaSettings
     {
         /// <summary>
-        /// Show the custom content item browser from within Content Area editor?
-        /// </summary>
-        public bool ContentAreaBrowse { get; set; } = false;
-
-        /// <summary>
         /// EditorDescriptor behavior,
         /// </summary>
         public EditorDescriptorBehavior ContentAreaEditorDescriptorBehavior { get; set; } =
