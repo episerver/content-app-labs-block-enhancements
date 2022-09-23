@@ -20,6 +20,16 @@ namespace EPiServer.Labs.BlockEnhancements
                     }
                 });
 
+            services.Configure<ProtectedModuleOptions>(
+                pm =>
+                {
+                    if (!pm.Items.Any(i =>
+                            i.Name.Equals("episerver-telemetry-ui", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        pm.Items.Add(new ModuleDetails { Name = "episerver-telemetry-ui" });
+                    }
+                });
+
             if (blockEnhancementsOptions != null)
             {
                 services.Configure(blockEnhancementsOptions);
