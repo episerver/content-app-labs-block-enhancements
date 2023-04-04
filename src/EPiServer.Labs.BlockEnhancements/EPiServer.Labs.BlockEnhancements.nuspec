@@ -16,11 +16,9 @@
     <dependencies>
       <group targetFramework="net5.0">
         <dependency id="EPiServer.CMS.UI.Core" version="[$CmsUIVersion$, $CmsUINextMajorVersion$)" />
-        <dependency id="EPiServer.Telemetry.UI" version="[$TelemetryVersion$, $TelemetryNextMajorVersion$)" include="all" />
       </group>
       <group targetFramework="net6.0">
         <dependency id="EPiServer.CMS.UI.Core" version="[$CmsUIVersion$, $CmsUINextMajorVersion$)" />
-        <dependency id="EPiServer.Telemetry.UI" version="[$TelemetryVersion$, $TelemetryNextMajorVersion$)" include="all" />
       </group>
     </dependencies>
     <contentFiles>
@@ -30,9 +28,7 @@
   <files>
 	  <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net5.0\EPiServer.Labs.BlockEnhancements.dll" target="lib\net5.0\" />
 	  <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net5.0\EPiServer.Labs.BlockEnhancements.pdb" target="lib\net5.0\" />
-	  <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net5.0\EPiServer.Labs.BlockEnhancements.Views.dll" target="lib\net5.0\" />
-    <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net5.0\EPiServer.Labs.BlockEnhancements.Views.pdb" target="lib\net5.0\" />
-    <file src="build\CopyZipFiles.targets" target="build\net5.0\Episerver.Labs.BlockEnhancements.targets" />
+	  <file src="build\CopyZipFiles.targets" target="build\net5.0\Episerver.Labs.BlockEnhancements.targets" />
 
     <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net6.0\EPiServer.Labs.BlockEnhancements.dll" target="lib\net6.0\" />
     <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net6.0\EPiServer.Labs.BlockEnhancements.pdb" target="lib\net6.0\" />

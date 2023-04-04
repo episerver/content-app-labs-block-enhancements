@@ -17,9 +17,6 @@
         <dialog>
           <title>Bekreft at du publiserer siden og det relaterte innholdet</title>
         </dialog>
-        <ilineediting>
-          <inlinetranslate>Opprett {missingLanguage} språkversjon</inlinetranslate>
-        </ilineediting>
       </blockenhancements>
     </episerverlabs>
   </language>

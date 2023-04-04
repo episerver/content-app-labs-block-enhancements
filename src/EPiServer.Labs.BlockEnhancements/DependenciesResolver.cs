@@ -200,9 +200,7 @@ namespace EPiServer.Labs.BlockEnhancements
             }
 
             // If the Local block feature is turned on then Smart Publish should not show local content at all
-            return _blockEnhancementsOptions.LocalContentFeatureEnabled
-                ? dependencies.Where(x => !x.IsLocal)
-                : dependencies;
+            return dependencies;
         }
 
         private string GetTypeIdentifier(IContent c)
