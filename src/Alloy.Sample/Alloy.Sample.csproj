@@ -5,7 +5,6 @@
     <NuspecFile>Alloy.Sample.LabsBlockEnhancements.nuspec</NuspecFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="EPiServer.Telemetry.UI" />
     <PackageReference Include="EPiServer.CMS.TinyMce" />
     <PackageReference Include="EPiServer.CMS.AspNetCore.HtmlHelpers" />
     <PackageReference Include="EPiServer.CMS.UI" />

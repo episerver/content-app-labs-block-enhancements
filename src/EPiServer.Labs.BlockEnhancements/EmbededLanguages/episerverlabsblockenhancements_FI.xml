@@ -15,9 +15,6 @@
         <dialog>
           <title>Vahvista että haluat julkaista sivun sekä siihen liittyvää sisältöä</title>
         </dialog>
-        <ilineediting>
-          <inlinetranslate>Luo {missingLanguage} kieliversio</inlinetranslate>
-        </ilineediting>
       </blockenhancements>
     </episerverlabs>
   </language>

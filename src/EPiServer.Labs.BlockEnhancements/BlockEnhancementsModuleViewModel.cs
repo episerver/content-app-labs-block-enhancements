@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using EPiServer.Core;
-using EPiServer.DataAbstraction;
-using EPiServer.Framework.Web.Resources;
+﻿using EPiServer.Framework.Web.Resources;
 using EPiServer.ServiceLocation;
-using EPiServer.Shell;
 using EPiServer.Shell.Modules;
-using EPiServer.Shell.ObjectEditing.EditorDescriptors;
 
 namespace EPiServer.Labs.BlockEnhancements
 {
@@ -15,70 +8,7 @@ namespace EPiServer.Labs.BlockEnhancements
     public class BlockEnhancementsOptions
     {
         public bool StatusIndicator { get; set; } = true;
-        public bool PublishPageWithBlocks { get; set; } = false;
-        public bool InlineTranslate { get; set; } = false;
-        public bool HideForThisFolder { get; set; } = true;
-        public bool LocalContentFeatureEnabled { get; set; } = true;
-        public bool AllowQuickEditOnSharedBlocks { get; set; } = false;
-        public bool LocalBlockConverterEnabled { get; set; } = true;
-
-        public IEnumerable<string> IgnoredBlockTypeIdentifiersOnQuickEdit { get; private set; } = new []
-        {
-            "episerver.forms.core.blockbase"
-        };
-
-        public IEnumerable<Type> IgnoreQuickEditOnBlockTypes
-        {
-            set
-            {
-                var uiDescriptorRegistry = ServiceLocator.Current.GetInstance<UIDescriptorRegistry>();
-                var contentTypeRepository = ServiceLocator.Current.GetInstance<IContentTypeRepository>();
-
-                if (value == null)
-                {
-                    return;
-                }
-
-                var contentTypesToIgnore = value.Select(x => contentTypeRepository.Load(x));
-
-                var ignoredTypeIdentifiers = contentTypesToIgnore
-                    .Select(x =>
-                        uiDescriptorRegistry
-                            .GetTypeIdentifiers(x.ModelType ??
-                                                ((x is PageType) ? typeof(PageData) : typeof(IContentData)))
-                            .FirstOrDefault())
-                    .Where(x => x != null);
-                IgnoredBlockTypeIdentifiersOnQuickEdit =
-                    IgnoredBlockTypeIdentifiersOnQuickEdit.Concat(ignoredTypeIdentifiers);
-            }
-        }
-
-        public IEnumerable<string> IgnoreQuickEditOnBlockTypeIdentifiers
-        {
-            set => IgnoredBlockTypeIdentifiersOnQuickEdit = IgnoredBlockTypeIdentifiersOnQuickEdit.Concat(value ?? Enumerable.Empty<string>());
-        }
-
-        public ContentAreaSettings ContentAreaSettings { get; set; } = new ContentAreaSettings();
-    }
-
-    /// <summary>
-    /// Settings specific to ContentArea property
-    /// </summary>
-    public class ContentAreaSettings
-    {
-        /// <summary>
-        /// EditorDescriptor behavior,
-        /// </summary>
-        public EditorDescriptorBehavior ContentAreaEditorDescriptorBehavior { get; set; } =
-            EditorDescriptorBehavior.OverrideDefault;
-
-        /// <summary>
-        /// The UIHint value that the custom content area will be available by
-        /// If you decide to specify a custom UIHint then you can change the behavior from
-        /// OverrideDefault to ExtendBase if for example you have your own custom
-        /// ContentArea descriptor.
-        /// </summary>
-        public string UIHint { get; set; }
+        public bool PublishPageWithBlocks { get; set; } = true;
     }
 
     public class BlockEnhancementsModule : ShellModule

@@ -18,12 +18,6 @@ $cmsUIVersion = $cmsUINode.InnerText
 $cmsUIParts = $cmsUIVersion.Split(".")
 $cmsUIMajor = [int]::Parse($cmsUIParts[0]) + 1
 $cmsUINextMajorVersion = ($cmsUIMajor.ToString() + ".0.0")
-# Telemetry dependency
-$telemetryNode = $versionFile.SelectSingleNode("Project/PropertyGroup/TelemetryVersion")
-$telemetryVersion = $telemetryNode.InnerText
-$telemetryParts = $telemetryVersion.Split(".")
-$telemetryMajor = [int]::Parse($telemetryParts[0]) + 1
-$telemetryNextMajorVersion = ($telemetryMajor.ToString() + ".0.0")
 # CMS Core dependency
 $cmsCoreNode = $versionFile.SelectSingleNode("Project/PropertyGroup/CmsCoreVersion")
 $cmsCoreVersion = $cmsCoreNode.InnerText
@@ -42,6 +36,6 @@ Set-Location $workingDirectory\
 exec "dotnet" "publish --no-restore --no-build -c $configuration src\\Alloy.Sample\\Alloy.Sample.csproj"
 
 # Packaging public packages
-exec "dotnet" "pack --no-restore --no-build -c $configuration /p:PackageVersion=$version /p:CmsCoreVersion=$cmsCoreVersion /p:CmsUIVersion=$cmsUIVersion /p:CmsUINextMajorVersion=$cmsUINextMajorVersion /p:TelemetryVersion=$telemetryVersion /p:TelemetryNextMajorVersion=$telemetryNextMajorVersion episerver-labs-block-enhancements.sln"
+exec "dotnet" "pack --no-restore --no-build -c $configuration /p:PackageVersion=$version /p:CmsCoreVersion=$cmsCoreVersion /p:CmsUIVersion=$cmsUIVersion /p:CmsUINextMajorVersion=$cmsUINextMajorVersion episerver-labs-block-enhancements.sln"
 
 Pop-Location
