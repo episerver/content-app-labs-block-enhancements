@@ -16,12 +16,6 @@
     <EmbeddedResource Include="EmbededLanguages\**\*" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="React\node_modules\**" />
-    <EmbeddedResource Remove="React\node_modules\**" />
-    <None Remove="React\node_modules\**" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Remove="module.config" />
-    <Content Remove="React\**" />
   </ItemGroup>
 </Project>

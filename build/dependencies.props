@@ -2,12 +2,10 @@
     <PropertyGroup>
         <CmsCoreVersion>12.5.0</CmsCoreVersion>
         <CmsUIVersion>12.6.0</CmsUIVersion>
-        <TelemetryVersion>2.2.0</TelemetryVersion>
         <TinyMceVersion>3.2.0</TinyMceVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Update="EPiServer.Telemetry.UI" Version="$(TelemetryVersion)"/>
         <PackageReference Update="EPiServer.CMS.TinyMce" Version="$(TinyMceVersion)"/>
         <PackageReference Update="EPiServer.CMS.AspNetCore.HtmlHelpers" Version="$(CmsCoreVersion)"/>
         <PackageReference Update="EPiServer.CMS.UI" Version="$(CmsUIVersion)"/>

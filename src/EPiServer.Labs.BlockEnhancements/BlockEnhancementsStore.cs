@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using EPiServer.Cms.Shell.UI.Rest.Internal;
 using EPiServer.Cms.Shell.UI.Rest.Models.Internal;
 using EPiServer.Core;
-using EPiServer.Labs.BlockEnhancements.InlineBlocksEditing;
 using EPiServer.Shell.Services.Rest;
 using Microsoft.AspNetCore.Mvc;
 
@@ -60,12 +60,6 @@ namespace EPiServer.Labs.BlockEnhancements
             }
 
             return Rest(items);
-        }
-
-        [HttpPost]
-        public ActionResult ConvertToLocalBlock(ContentReference id)
-        {
-            return new EmptyResult();
         }
     }
 }
