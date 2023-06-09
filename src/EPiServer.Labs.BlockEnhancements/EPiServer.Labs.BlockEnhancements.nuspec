@@ -9,32 +9,24 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>>Collection of useful enhancements around Block Publishing process.</description>
     <releaseNotes/>
-    <copyright>Copyright 2021</copyright>
+    <copyright>Copyright 2023</copyright>
     <tags>content block blocks labs enhancements publishing publish local</tags>
     <licenseUrl>https://raw.githubusercontent.com/episerver/episerver.labs.blockenhancements/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/episerver/episerver.labs.blockenhancements</projectUrl>
     <dependencies>
-      <group targetFramework="net5.0">
-        <dependency id="EPiServer.CMS.UI.Core" version="[$CmsUIVersion$, $CmsUINextMajorVersion$)" />
-      </group>
       <group targetFramework="net6.0">
         <dependency id="EPiServer.CMS.UI.Core" version="[$CmsUIVersion$, $CmsUINextMajorVersion$)" />
       </group>
     </dependencies>
     <contentFiles>
-      <files include="any/any/modules/_protected/episerver-labs-block-enhancements\episerver-labs-block-enhancements.zip" buildAction="None" copyToOutput="true"  />
+      <files include="any/any/modules/_protected/episerver-labs-block-enhancements\module.config" buildAction="None" copyToOutput="true"  />
     </contentFiles>
   </metadata>
   <files>
-	  <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net5.0\EPiServer.Labs.BlockEnhancements.dll" target="lib\net5.0\" />
-	  <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net5.0\EPiServer.Labs.BlockEnhancements.pdb" target="lib\net5.0\" />
-	  <file src="build\CopyZipFiles.targets" target="build\net5.0\Episerver.Labs.BlockEnhancements.targets" />
-
     <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net6.0\EPiServer.Labs.BlockEnhancements.dll" target="lib\net6.0\" />
     <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net6.0\EPiServer.Labs.BlockEnhancements.pdb" target="lib\net6.0\" />
-    <file src="build\CopyZipFiles.targets" target="build\net6.0\Episerver.Labs.BlockEnhancements.targets" />
 
-    <file src="out\episerver-labs-block-enhancements\episerver-labs-block-enhancements.zip" target="contentFiles\any\any\modules\_protected\episerver-labs-block-enhancements\" />
+    <file src="src\EPiServer.Labs.BlockEnhancements\module.config" target="contentFiles\any\any\modules\_protected\episerver-labs-block-enhancements\" />
     <file src="src\EPiServer.Labs.BlockEnhancements\readme.txt" target="" />
   </files>
 </package>
