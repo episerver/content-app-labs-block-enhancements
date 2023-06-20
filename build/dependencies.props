@@ -1,7 +1,7 @@
 <Project>
     <PropertyGroup>
         <CmsCoreVersion>12.15.0</CmsCoreVersion>
-        <CmsUIVersion>12.21.0-pre-031106</CmsUIVersion>
+        <CmsUIVersion>12.21.0</CmsUIVersion>
         <TinyMceVersion>4.4.0</TinyMceVersion>
     </PropertyGroup>
 
