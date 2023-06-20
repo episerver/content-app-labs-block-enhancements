@@ -2,7 +2,7 @@
   <Import Project="..\..\build\common.props" />
   <Import Project="..\..\build\nuspec.props" />
   <PropertyGroup>
-    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <NoWarn>NU5125</NoWarn>
     <NuspecFile>EPiServer.Labs.BlockEnhancements.nuspec</NuspecFile>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
@@ -11,9 +11,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EPiServer.CMS.UI.Core" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="EmbededLanguages\**\*" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="module.config" />

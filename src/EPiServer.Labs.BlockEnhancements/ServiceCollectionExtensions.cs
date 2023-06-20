@@ -7,8 +7,7 @@ namespace EPiServer.Labs.BlockEnhancements
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddBlockEnhancements(this IServiceCollection services,
-            Action<BlockEnhancementsOptions> blockEnhancementsOptions = null)
+        public static IServiceCollection AddBlockEnhancements(this IServiceCollection services)
         {
             services.Configure<ProtectedModuleOptions>(
                 pm =>
@@ -19,11 +18,6 @@ namespace EPiServer.Labs.BlockEnhancements
                         pm.Items.Add(new ModuleDetails { Name = "episerver-labs-block-enhancements" });
                     }
                 });
-
-            if (blockEnhancementsOptions != null)
-            {
-                services.Configure(blockEnhancementsOptions);
-            }
 
             return services;
         }

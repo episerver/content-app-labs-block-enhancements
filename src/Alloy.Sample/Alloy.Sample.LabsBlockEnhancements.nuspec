@@ -11,7 +11,7 @@
     <releaseNotes/>
   </metadata>
   <files>
-    <file src="out\episerver-labs-block-enhancements\episerver-labs-block-enhancements.zip"
+    <file src="src\EPiServer.Labs.BlockEnhancements\module.config"
           target="wwwroot\modules\_protected\episerver-labs-block-enhancements\"/>
 
     <file src="build\database\DefaultSiteContent.episerverdata"
