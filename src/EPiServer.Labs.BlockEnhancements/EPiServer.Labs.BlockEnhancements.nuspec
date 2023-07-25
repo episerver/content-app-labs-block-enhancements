@@ -26,6 +26,8 @@
     <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net6.0\EPiServer.Labs.BlockEnhancements.dll" target="lib\net6.0\" />
     <file src="src\EPiServer.Labs.BlockEnhancements\bin\$configuration$\net6.0\EPiServer.Labs.BlockEnhancements.pdb" target="lib\net6.0\" />
 
+    <file src="build\CopyZipFiles.targets" target="build\net6.0\Episerver.Labs.BlockEnhancements.targets" />
+
     <file src="src\EPiServer.Labs.BlockEnhancements\module.config" target="contentFiles\any\any\modules\_protected\episerver-labs-block-enhancements\" />
     <file src="src\EPiServer.Labs.BlockEnhancements\readme.txt" target="" />
   </files>
