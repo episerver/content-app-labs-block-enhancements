@@ -78,6 +78,7 @@
         </style>
 </head>
 <body>
+@Html.AntiForgeryToken()
 @Html.Raw(Html.CreatePlatformNavigationMenu())
 <noscript>You need to enable JavaScript to run this app.</noscript>
 <div id="wrapper" @Html.Raw(Html.ApplyFullscreenPlatformNavigation())>
