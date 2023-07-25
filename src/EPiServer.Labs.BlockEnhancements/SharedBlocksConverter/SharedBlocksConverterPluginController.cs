@@ -47,9 +47,8 @@ public class SharedBlocksConverterPluginController : Controller
 
         if (dto.convertInlineBlock)
         {
-            var analyzedInlineBlocks = _convertInlineBlocks.Convert(out var convertedInlineBlocks, out var convertedContentItems);
-            result.Add(
-                $"Analyzed {analyzedInlineBlocks} content items and converted {convertedInlineBlocks} inline blocks in {convertedContentItems} content items");
+            var analyzedInlineBlocks = _convertInlineBlocks.Convert();
+            result.Add(analyzedInlineBlocks.ToString());
         }
 
         if (dto.convertSharedBlocks)
