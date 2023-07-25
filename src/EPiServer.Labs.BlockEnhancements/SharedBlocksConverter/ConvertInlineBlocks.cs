@@ -13,6 +13,25 @@ using EPiServer.ServiceLocation;
 
 namespace EPiServer.Labs.BlockEnhancements.SharedBlocksConverter;
 
+public class ConvertInlineBlocksResult
+{
+    public int Analyzed { get; set; }
+    public int ConvertedBlocksCount { get; set; }
+    public int ConvertedContentItems { get; set; }
+    public int FailedContentItems { get; set; }
+
+    public override string ToString()
+    {
+        var result = $"Analyzed {Analyzed} content items and converted {ConvertedBlocksCount} in {ConvertedContentItems} content items. ";
+        if (FailedContentItems > 0)
+        {
+            result +=
+                $"{FailedContentItems} content items with inline blocks failed. Please see the logs for more details.";
+        }
+        return result;
+    }
+}
+
 [ServiceConfiguration(typeof(ConvertInlineBlocks))]
 public class ConvertInlineBlocks
 {
@@ -33,7 +52,7 @@ public class ConvertInlineBlocks
         _labsOptions = labsOptions;
     }
 
-    public int Convert(out int convertedCount, out int convertedContentItems, Action<string> onStatusChanged = null)
+    public ConvertInlineBlocksResult Convert(Action<string> onStatusChanged = null)
     {
         var versionFilter = new VersionFilter
         {
@@ -43,29 +62,42 @@ public class ConvertInlineBlocks
         var latestVersions = _contentVersionRepository.List(versionFilter, 0, _labsOptions.VersionsToCheck, out var totalCount);
 
         var convertedBlocksCount = 0;
-        var convertedParentContentItemsCount = 0;
-        var analyzedContentCount = totalCount;
+        var convertedContentItems = 0;
+        var failedContentItems = 0;
         var index = 1;
+        var defaultConversionFolderName = "Converted Local Blocks " + DateTime.Now.ToString("u");
         foreach (var version in latestVersions)
         {
-            var convertedBlocks = TryConvertContent(version);
-            if (convertedBlocks.Any())
+            try
             {
-                convertedBlocksCount += convertedBlocks.Count();
-                convertedParentContentItemsCount++;
+                var convertedBlocks = TryConvertContent(version, defaultConversionFolderName);
+                if (convertedBlocks.Any())
+                {
+                    convertedBlocksCount += convertedBlocks.Count();
+                    convertedContentItems++;
+                }
+            }
+            catch(Exception ex)
+            {
+                failedContentItems++;
+                _log.Warning($"Failed to convert inline blocks on content item with contentLink = {version.ContentLink}", ex);
             }
 
             onStatusChanged?.Invoke(
-                $"Analyzed {index} out of {analyzedContentCount} content items and converted {convertedBlocksCount} inline blocks in {convertedParentContentItemsCount}");
+                $"Analyzed {index} out of {totalCount}, so far converted {convertedContentItems} content items, ${failedContentItems} failed");
             index++;
         }
 
-        convertedCount = convertedBlocksCount;
-        convertedContentItems = convertedParentContentItemsCount;
-        return analyzedContentCount;
+        return new ConvertInlineBlocksResult
+        {
+            Analyzed = totalCount,
+            ConvertedBlocksCount = convertedBlocksCount,
+            ConvertedContentItems = convertedContentItems,
+            FailedContentItems = failedContentItems
+        };
     }
 
-    private IEnumerable<ContentReference> TryConvertContent(ContentVersion version)
+    private IEnumerable<ContentReference> TryConvertContent(ContentVersion version, string defaultConversionFolderName)
     {
         var content = _contentRepository.Get<IContent>(version.ContentLink);
         if (content is ContentFolder or IContentMedia or not IReadOnly)
@@ -90,7 +122,7 @@ public class ConvertInlineBlocks
                 && propertyData.Value != null
                 && propertyData.Value is ContentArea contentAreaValue)
             {
-                convertedBlocks.AddRange(ConvertContentAreaProperty(writableClone, contentAreaValue));
+                convertedBlocks.AddRange(ConvertContentAreaProperty(writableClone, contentAreaValue, defaultConversionFolderName));
             }
         }
 
@@ -98,7 +130,7 @@ public class ConvertInlineBlocks
         {
             _contentRepository.Save(writableClone, SaveAction.Patch, AccessLevel.NoAccess);
             _log.Information(
-                $"Converted inline blocks on content item with contentLink = {writableClone.ContentLink}, convertedBlocksCout = {convertedBlocks.Count}");
+                $"Converted inline blocks on content item with contentLink = {writableClone.ContentLink}, convertedBlocksCount = {convertedBlocks.Count}");
 
             return convertedBlocks;
         }
@@ -106,7 +138,7 @@ public class ConvertInlineBlocks
         return Enumerable.Empty<ContentReference>();
     }
 
-    private IEnumerable<ContentReference> ConvertContentAreaProperty(IContent owner, ContentArea propertyDataValue)
+    private IEnumerable<ContentReference> ConvertContentAreaProperty(IContent owner, ContentArea propertyDataValue, string defaultConversionFolderName)
     {
         var convertedInlineBlocks = new List<ContentReference>();
         for (var index = 0; index < propertyDataValue.Items.Count; index++)
@@ -118,15 +150,37 @@ public class ConvertInlineBlocks
             }
 
             var contentType = _contentTypeRepository.Load(contentAreaItem.InlineBlock.ContentTypeID);
-            var forThisPageFolder = _contentChangeManager.GetOrCreateContentAssetsFolder(owner.ContentLink);
-            var localBlock = _contentRepository.GetDefault<IContent>(forThisPageFolder, contentType.ID);
+
+            ContentReference folderToMigrateInto;
+            if (_labsOptions.MigrateInlineBlocksToForThisPageFolders)
+            {
+                var forThisFolder = _contentChangeManager.GetOrCreateContentAssetsFolder(owner.ContentLink);
+                if (forThisFolder != null)
+                {
+                    folderToMigrateInto = forThisFolder;
+                }
+                else
+                {
+                    folderToMigrateInto = GetOrCreateDefaultFolder(defaultConversionFolderName);
+                    _log.Warning($"Could not GetOrCreate an assets folder for {owner.ContentLink}. Falling back to a global folder");
+                }
+            }
+            else
+            {
+                folderToMigrateInto = GetOrCreateDefaultFolder(defaultConversionFolderName);
+            }
+
+            var localBlock = _contentRepository.GetDefault<IContent>(folderToMigrateInto, contentType.ID);
 
             foreach (var property in contentAreaItem.InlineBlock.Property)
             {
                 localBlock.SetPropertyValue(property.Name, property.Value);
             }
 
-            localBlock.Name = contentType.LocalizedName + (index + 1);
+            //In case all blocks are migrated to the same folder we want their names to be prefixed with their parent's name
+            localBlock.Name = this._labsOptions.MigrateInlineBlocksToForThisPageFolders
+                ? contentType.LocalizedName + (index + 1)
+                : $"{owner.Name}_{contentType.LocalizedName}_{index + 1}";
             var localBlockContentLink = _contentRepository.Save(localBlock, SaveAction.Save | SaveAction.Publish, AccessLevel.NoAccess);
 
             var writableClone = contentAreaItem.CreateWritableClone();
@@ -137,5 +191,21 @@ public class ConvertInlineBlocks
         }
 
         return convertedInlineBlocks;
+    }
+
+    private ContentReference GetOrCreateDefaultFolder(string defaultConversionFolderName)
+    {
+        var children = _contentRepository.GetChildren<ContentFolder>(ContentReference.GlobalBlockFolder);
+        var defaultFolder = children.FirstOrDefault(x =>
+            x.Name.Equals(defaultConversionFolderName, StringComparison.InvariantCultureIgnoreCase));
+        if (defaultFolder != null)
+        {
+            return defaultFolder.ContentLink;
+        }
+
+        var contentFolderType = this._contentTypeRepository.Load(typeof(ContentFolder));
+        var folder = _contentRepository.GetDefault<ContentFolder>(ContentReference.GlobalBlockFolder, contentFolderType.ID);
+        folder.Name = defaultConversionFolderName;
+        return _contentRepository.Save(folder, SaveAction.Publish, AccessLevel.NoAccess);
     }
 }
