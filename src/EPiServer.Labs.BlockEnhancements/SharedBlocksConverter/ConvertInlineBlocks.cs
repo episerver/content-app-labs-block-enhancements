@@ -7,6 +7,7 @@ using EPiServer.Core;
 using EPiServer.Data.Entity;
 using EPiServer.DataAbstraction;
 using EPiServer.DataAccess;
+using EPiServer.Logging;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
 
@@ -19,47 +20,44 @@ public class ConvertInlineBlocks
     private readonly IContentVersionRepository _contentVersionRepository;
     private readonly IContentTypeRepository _contentTypeRepository;
     private readonly IContentChangeManager _contentChangeManager;
+    private readonly LabsOptions _labsOptions;
+    private static readonly ILogger _log = LogManager.GetLogger(typeof(ConvertInlineBlocks));
 
     public ConvertInlineBlocks(IContentRepository contentRepository, IContentChangeManager contentChangeManager,
-        IContentTypeRepository contentTypeRepository, IContentVersionRepository contentVersionRepository)
+        IContentTypeRepository contentTypeRepository, IContentVersionRepository contentVersionRepository, LabsOptions labsOptions)
     {
         _contentRepository = contentRepository;
         _contentChangeManager = contentChangeManager;
         _contentTypeRepository = contentTypeRepository;
         _contentVersionRepository = contentVersionRepository;
+        _labsOptions = labsOptions;
     }
 
-    public int Convert(ContentReference rootPage, out int convertedCount, out int convertedContentItems, Action<string> onStatusChanged = null)
+    public int Convert(out int convertedCount, out int convertedContentItems, Action<string> onStatusChanged = null)
     {
-        return ConvertRecursively(rootPage, out convertedCount, out convertedContentItems, onStatusChanged);
-    }
+        var versionFilter = new VersionFilter
+        {
+            SortColumn = VersionSortColumn.Saved,
+            SortDirection = VersionSortDirection.Descending
+        };
+        var latestVersions = _contentVersionRepository.List(versionFilter, 0, _labsOptions.VersionsToCheck, out var totalCount);
 
-    private int ConvertRecursively(ContentReference rootPage, out int convertedCount, out int convertedContentItems, Action<string> onStatusChanged = null)
-    {
         var convertedBlocksCount = 0;
         var convertedParentContentItemsCount = 0;
-        var root = _contentRepository.Get<IContent>(rootPage);
-        var convertedRoot = TryConvertContent(root);
-        if (convertedRoot.Any())
+        var analyzedContentCount = totalCount;
+        var index = 1;
+        foreach (var version in latestVersions)
         {
-            convertedBlocksCount += convertedRoot.Count();
-        }
-        var children = _contentRepository.GetChildren<IContent>(rootPage, LanguageSelector.AutoDetect(true)).ToList();
-        var analyzedContentCount = children.Count + 1;
-        foreach (var content in children)
-        {
-            var convertedBlocks = TryConvertContent(content);
+            var convertedBlocks = TryConvertContent(version);
             if (convertedBlocks.Any())
             {
                 convertedBlocksCount += convertedBlocks.Count();
                 convertedParentContentItemsCount++;
             }
 
-            analyzedContentCount += ConvertRecursively(content.ContentLink, out var convertedChildrenCount, out var convertedContentItemsCount);
-            convertedBlocksCount += convertedChildrenCount;
-            convertedParentContentItemsCount += convertedContentItemsCount;
             onStatusChanged?.Invoke(
-                $"Analyzed {analyzedContentCount} content items and converted {convertedBlocksCount} inline blocks in {convertedParentContentItemsCount}");
+                $"Analyzed {index} out of {analyzedContentCount} content items and converted {convertedBlocksCount} inline blocks in {convertedParentContentItemsCount}");
+            index++;
         }
 
         convertedCount = convertedBlocksCount;
@@ -67,18 +65,16 @@ public class ConvertInlineBlocks
         return analyzedContentCount;
     }
 
-    private IEnumerable<ContentReference> TryConvertContent(IContent content)
+    private IEnumerable<ContentReference> TryConvertContent(ContentVersion version)
     {
+        var content = _contentRepository.Get<IContent>(version.ContentLink);
         if (content is ContentFolder or IContentMedia or not IReadOnly)
         {
             return Enumerable.Empty<ContentReference>();
         }
 
-        var publishedOrDraft = _contentVersionRepository.LoadCommonDraft(content.ContentLink, content.LanguageBranch());
-        var draftContent = _contentRepository.Get<IContent>(publishedOrDraft.ContentLink);
-
         var convertedBlocks = new List<ContentReference>();
-        if ((draftContent as IReadOnly).CreateWritableClone() is not IContent writableClone)
+        if ((content as IReadOnly).CreateWritableClone() is not IContent writableClone)
         {
             return Enumerable.Empty<ContentReference>();
         }
@@ -94,13 +90,15 @@ public class ConvertInlineBlocks
                 && propertyData.Value != null
                 && propertyData.Value is ContentArea contentAreaValue)
             {
-                convertedBlocks.AddRange(ConvertContentAreaProperty(draftContent, contentAreaValue));
+                convertedBlocks.AddRange(ConvertContentAreaProperty(writableClone, contentAreaValue));
             }
         }
 
         if (convertedBlocks.Any())
         {
             _contentRepository.Save(writableClone, SaveAction.Patch, AccessLevel.NoAccess);
+            _log.Information(
+                $"Converted inline blocks on content item with contentLink = {writableClone.ContentLink}, convertedBlocksCout = {convertedBlocks.Count}");
 
             return convertedBlocks;
         }

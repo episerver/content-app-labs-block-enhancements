@@ -1,5 +1,4 @@
 using System;
-using EPiServer.Core;
 using EPiServer.PlugIn;
 using EPiServer.Scheduler;
 
@@ -28,8 +27,7 @@ public class ConvertInlineBlocksJob : ScheduledJobBase
         //Call OnStatusChanged to periodically notify progress of job for manually started jobs
         OnStatusChanged(String.Format("Starting execution of {0}", this.GetType()));
 
-        var analyzedInlineBlocks = _convertInlineBlocks.Convert(ContentReference.RootPage,
-            out var convertedInlineBlocks, out var convertedContentItems, OnStatusChanged);
+        var analyzedInlineBlocks = _convertInlineBlocks.Convert(out var convertedInlineBlocks, out var convertedContentItems, OnStatusChanged);
 
         if (_stopSignaled)
         {
