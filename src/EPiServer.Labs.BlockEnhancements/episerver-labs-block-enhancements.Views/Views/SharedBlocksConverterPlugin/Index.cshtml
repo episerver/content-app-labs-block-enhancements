@@ -1,4 +1,6 @@
 @using EPiServer.Framework.Web.Resources
+@using EPiServer.Labs.BlockEnhancements.SharedBlocksConverter
+@using EPiServer.Shell
 @using EPiServer.Shell.Navigation
 @using EPiServer.Shell.Navigation.Internal
 
@@ -55,12 +57,23 @@
                 margin-bottom: 32px;
             }
 
+            .container h4 {
+                margin: 16px 0;
+            }
+
             .container .form-value {
                 margin-top: 32px;
             }
 
-            button {
-                background-color: #0037ff;
+            #submit {
+                background-color: lightblue;
+                margin-top: 32px;
+            }
+
+            #result {
+                margin-bottom:  16px;
+                padding: 16px;
+                background-color: lightblue;
             }
         </style>
 </head>
@@ -72,11 +85,12 @@
         <div class="container">
             <h1>Inline Block converter</h1>
             <div>
-                <div id="result"></div>
+                <div id="result" style="display: none;"></div>
                 <label>
                     <span>Root id</span><input class="formValue" name="root" type="text" value="1"/>
                 </label>
 
+                <h4>Convert shared to inline</h4>
                 <div class="form-value">
                     <label>
                         <span>Convert shared blocks to local blocks</span>
@@ -101,14 +115,27 @@
                     <span class="description">Remove all empty assets pane folders</span>
                 </div>
 
-                <button onclick="onConvert()">Convert</button>
+                <h4>Convert inline to shared</h4>
+                <div class="form-value">
+                    <label>
+                        <span>Convert inline blocks to local blocks</span>
+                        <input class="formValue" name="convertInlineBlock" type="checkbox" value="false"/>
+                    </label>
+                    <span class="description">Move all inline blocks from content areas to their respective `For this...` folders</span>
+                </div>
+
+                <button id="submit" onclick="onConvert()">Convert</button>
             </div>
         </div>
     </div>
     <script type="text/javascript">
         function onConvert() {
             var result = document.getElementById("result");
+            var button = document.getElementById("submit");
             result.innerHTML = "";
+            result.style.display = "none";
+            button.innerHTML = "Converting...";
+            button.disabled = true;
 
             var elements = document.getElementsByClassName("formValue");
             var formData = new FormData();
@@ -119,14 +146,26 @@
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
-                    result.innerHTML = xhr.responseText;
+                    var responseText = xhr.responseText;
+                    if (!responseText) return;
+                    try {
+                        var listOfConvertedItems = JSON.parse(responseText);
+                        if (listOfConvertedItems.length > 0) {
+                            result.innerHTML = listOfConvertedItems.join("<br />");
+                            result.style.display = "block";
+                        }
+                    } catch {
+                        result.innerHTML = "No items were converted";
+                        result.style.display = "block";
+                    }
                 }
+
+                button.innerHTML = "Convert";
+                button.disabled = false;
             }
-            xhr.open("post", "/SharedBlocksConverterPlugin/Convert");
+            xhr.open("post", "@Paths.ToResource(typeof(SharedBlocksConverterPluginController).Assembly, "SharedBlocksConverterPlugin/Convert")");
             xhr.setRequestHeader("Accept", "application/json");
             xhr.send(formData);
-
-
         }
     </script>
 </div>

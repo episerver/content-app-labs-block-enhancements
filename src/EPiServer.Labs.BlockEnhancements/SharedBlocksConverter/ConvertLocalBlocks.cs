@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using EPiServer.Cms.Shell.UI.Rest.Capabilities;
 using EPiServer.Core;
@@ -25,17 +26,22 @@ public class ConvertLocalBlocks
         _localContentCapability = capabilities.Single(x => x.Key == "isLocalContent");
     }
 
-    public int Convert(ContentReference rootPage, out int convertedCount)
+    public int Convert(ContentReference rootPage, out int convertedCount, Action<string> onStatusChanged = null)
     {
         return ConvertRecursively(rootPage, out convertedCount);
     }
 
-    private int ConvertRecursively(ContentReference rootPage, out int convertedCount)
+    private int ConvertRecursively(ContentReference rootPage, out int convertedCount, Action<string> onStatusChanged = null)
     {
-        var analyzedContentCount = 0;
         var convertedContentCount = 0;
-        var children = _contentRepository.GetChildren<IContent>(rootPage).ToList();
-        analyzedContentCount = children.Count;
+        var root = _contentRepository.Get<IContent>(rootPage);
+        var convertedRoot = TryConvertContent(root);
+        if (convertedRoot)
+        {
+            convertedContentCount++;
+        }
+        var children = _contentRepository.GetChildren<IContent>(rootPage, LanguageSelector.AutoDetect(true)).ToList();
+        var analyzedContentCount = children.Count + 1;
         foreach (var content in children)
         {
             var converted = TryConvertContent(content);
@@ -46,6 +52,8 @@ public class ConvertLocalBlocks
 
             analyzedContentCount += ConvertRecursively(content.ContentLink, out var convertedChildrenCount);
             convertedContentCount += convertedChildrenCount;
+            onStatusChanged?.Invoke(
+                $"Analyzed {analyzedContentCount} contents and converted {convertedContentCount} to inline blocks");
         }
 
         convertedCount = convertedContentCount;
@@ -82,8 +90,7 @@ public class ConvertLocalBlocks
 
         if (blocksToDelete.Any())
         {
-            _contentRepository.Save(writableClone,
-                SaveAction.Save | SaveAction.SkipValidation/* | SaveAction.ForceCurrentVersion*/);
+            _contentRepository.Save(writableClone, SaveAction.Patch, AccessLevel.NoAccess);
 
             foreach (var contentReference in blocksToDelete)
             {

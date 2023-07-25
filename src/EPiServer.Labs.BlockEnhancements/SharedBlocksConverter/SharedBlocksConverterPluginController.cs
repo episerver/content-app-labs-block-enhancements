@@ -9,17 +9,20 @@ namespace EPiServer.Labs.BlockEnhancements.SharedBlocksConverter;
 [Authorize(Roles = "CmsAdmin,WebAdmins,Administrators")]
 public class SharedBlocksConverterPluginController : Controller
 {
+    private readonly ConvertInlineBlocks _convertInlineBlocks;
     private readonly ConvertSharedBlocks _convertSharedBlocks;
     private readonly ConvertLocalBlocks _convertLocalBlocks;
     private readonly CleanupFolders _cleanupFolders;
 
     public SharedBlocksConverterPluginController(ConvertSharedBlocks convertSharedBlocks,
         ConvertLocalBlocks convertLocalBlocks,
-        CleanupFolders cleanupFolders)
+        CleanupFolders cleanupFolders,
+        ConvertInlineBlocks convertInlineBlocks)
     {
         _convertSharedBlocks = convertSharedBlocks;
         _convertLocalBlocks = convertLocalBlocks;
         _cleanupFolders = cleanupFolders;
+        _convertInlineBlocks = convertInlineBlocks;
     }
 
     public IActionResult Index()
@@ -42,6 +45,13 @@ public class SharedBlocksConverterPluginController : Controller
 
         var result = new List<string>();
 
+        if (dto.convertInlineBlock)
+        {
+            var analyzedInlineBlocks = _convertInlineBlocks.Convert(rootId, out var convertedInlineBlocks, out var convertedContentItems);
+            result.Add(
+                $"Analyzed {analyzedInlineBlocks} content items and converted {convertedInlineBlocks} inline blocks in {convertedContentItems} content items");
+        }
+
         if (dto.convertSharedBlocks)
         {
             var analyzedSharedBlocksCount = _convertSharedBlocks.Convert(rootId, out var convertedSharedBlocksCount);
@@ -63,7 +73,7 @@ public class SharedBlocksConverterPluginController : Controller
                 $"Analyzed {analyzedFoldersCount} folders and deleted {convertedFoldersCount}");
         }
 
-        return new JsonDataResult(string.Join("<br />", result));
+        return new JsonDataResult(result);
     }
 
     public class ConvertSharedBlocksDto
@@ -72,5 +82,6 @@ public class SharedBlocksConverterPluginController : Controller
         public bool convertSharedBlocks { get; set; }
         public bool convertLocalBlocks { get; set; }
         public bool cleanupFolders { get; set; }
+        public bool convertInlineBlock { get; set; }
     }
 }

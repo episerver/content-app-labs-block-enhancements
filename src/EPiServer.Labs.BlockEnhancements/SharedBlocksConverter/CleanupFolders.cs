@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using EPiServer.Core;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
@@ -15,17 +16,16 @@ public class CleanupFolders
         _contentRepository = contentRepository;
     }
 
-    public int Convert(ContentReference rootPage, out int convertedCount)
+    public int Convert( ContentReference rootPage, out int convertedCount, Action<string> onStatusChanged = null)
     {
         return ConvertRecursively(rootPage, out convertedCount);
     }
 
-    private int ConvertRecursively(ContentReference rootPage, out int convertedCount)
+    private int ConvertRecursively(ContentReference rootPage, out int convertedCount, Action<string> onStatusChanged = null)
     {
-        var analyzedFoldersCount = 0;
         var convertedFoldersCount = 0;
-        var children = _contentRepository.GetChildren<IContent>(rootPage).ToList();
-        analyzedFoldersCount = children.OfType<ContentFolder>().Count();
+        var children = _contentRepository.GetChildren<IContent>(rootPage, LanguageSelector.AutoDetect(true)).ToList();
+        var analyzedFoldersCount = children.OfType<ContentFolder>().Count();
         foreach (var content in children)
         {
             // do not do the cleanup for external providers
@@ -42,6 +42,8 @@ public class CleanupFolders
 
             analyzedFoldersCount += ConvertRecursively(content.ContentLink, out var convertedChildrenCount);
             convertedFoldersCount += convertedChildrenCount;
+            onStatusChanged?.Invoke(
+                $"Analyzed {analyzedFoldersCount} folders and deleted {convertedFoldersCount}");
         }
 
         convertedCount = convertedFoldersCount;
@@ -60,7 +62,7 @@ public class CleanupFolders
             return false;
         }
 
-        var children = _contentRepository.GetChildren<IContent>(content.ContentLink).ToList();
+        var children = _contentRepository.GetChildren<IContent>(content.ContentLink, LanguageSelector.AutoDetect(true)).ToList();
         if (children.Any())
         {
             return false;
