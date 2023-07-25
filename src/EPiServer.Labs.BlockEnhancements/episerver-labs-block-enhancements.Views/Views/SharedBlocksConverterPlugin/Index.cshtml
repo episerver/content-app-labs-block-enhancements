@@ -65,12 +65,12 @@
                 margin-top: 32px;
             }
 
-            #submit {
+            #submit, #submitInline {
                 background-color: lightblue;
                 margin-top: 32px;
             }
 
-            #result {
+            #result, #resultInline {
                 margin-bottom:  16px;
                 padding: 16px;
                 background-color: lightblue;
@@ -85,12 +85,12 @@
         <div class="container">
             <h1>Inline Block converter</h1>
             <div>
+                <h4>Convert shared to inline</h4>
                 <div id="result" style="display: none;"></div>
                 <label>
-                    <span>Root id</span><input class="formValue" name="root" type="text" value="1"/>
+                    <span>Start from this contentLink</span><input class="formValue" name="root" type="text" value="1"/>
                 </label>
 
-                <h4>Convert shared to inline</h4>
                 <div class="form-value">
                     <label>
                         <span>Convert shared blocks to local blocks</span>
@@ -115,27 +115,35 @@
                     <span class="description">Remove all empty assets pane folders</span>
                 </div>
 
+                <button id="submit" onclick="onConvert(false)">Convert</button>
+
                 <h4>Convert inline to shared</h4>
-                <div class="form-value">
-                    <label>
-                        <span>Convert inline blocks to local blocks</span>
-                        <input class="formValue" name="convertInlineBlock" type="checkbox" value="false"/>
-                    </label>
+                <div id="resultInline" style="display: none;"></div>
+                <div>
                     <span class="description">Move all inline blocks from content areas to their respective `For this...` folders</span>
                 </div>
 
-                <button id="submit" onclick="onConvert()">Convert</button>
+                <button id="submitInline" onclick="onConvert(true)">Convert all inline blocks to shared</button>
             </div>
         </div>
     </div>
     <script type="text/javascript">
-        function onConvert() {
+        function onConvert(inlineBlocks) {
             var result = document.getElementById("result");
+            var resultInline = document.getElementById("resultInline");
             var button = document.getElementById("submit");
+            var submitInline = document.getElementById("submitInline");
             result.innerHTML = "";
             result.style.display = "none";
-            button.innerHTML = "Converting...";
+            resultInline.innerHTML = "";
+            resultInline.style.display = "none";
+            if (inlineBlocks) {
+                submitInline.innerHTML = "Converting...";
+            } else {
+                button.innerHTML = "Converting...";
+            }
             button.disabled = true;
+            submitInline.disabled = true;
 
             var elements = document.getElementsByClassName("formValue");
             var formData = new FormData();
@@ -143,25 +151,30 @@
                 formData.append(elements[i].name, elements[i].type === "checkbox" ? elements[i].checked : elements[i].value);
             }
 
+            formData.append("convertInlineBlock", inlineBlocks);
+
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     var responseText = xhr.responseText;
+                    var resultElement = inlineBlocks ? resultInline : result;
                     if (!responseText) return;
                     try {
                         var listOfConvertedItems = JSON.parse(responseText);
                         if (listOfConvertedItems.length > 0) {
-                            result.innerHTML = listOfConvertedItems.join("<br />");
-                            result.style.display = "block";
+                            resultElement.innerHTML = listOfConvertedItems.join("<br />");
+                            resultElement.style.display = "block";
                         }
                     } catch {
-                        result.innerHTML = "No items were converted";
-                        result.style.display = "block";
+                        resultElement.innerHTML = "No items were converted";
+                        resultElement.style.display = "block";
                     }
                 }
 
                 button.innerHTML = "Convert";
+                submitInline.innerHTML = "Convert all inline blocks to shared";
                 button.disabled = false;
+                submitInline.disabled = false;
             }
             xhr.open("post", "@Paths.ToResource(typeof(SharedBlocksConverterPluginController).Assembly, "SharedBlocksConverterPlugin/Convert")");
             xhr.setRequestHeader("Accept", "application/json");
