@@ -17,7 +17,7 @@
     <!-- LightTheme -->
     @ClientResources.RenderResources("ShellCoreLightTheme")
 
-    <style type="text/css">
+    <style>
             html,
             body {
                 height: 100%;
@@ -130,10 +130,10 @@
     </div>
     <script type="text/javascript">
         function onConvert(inlineBlocks) {
-            var result = document.getElementById("result");
-            var resultInline = document.getElementById("resultInline");
-            var button = document.getElementById("submit");
-            var submitInline = document.getElementById("submitInline");
+            const result = document.getElementById("result");
+            const resultInline = document.getElementById("resultInline");
+            const button = document.getElementById("submit");
+            const submitInline = document.getElementById("submitInline");
             result.innerHTML = "";
             result.style.display = "none";
             resultInline.innerHTML = "";
@@ -146,22 +146,23 @@
             button.disabled = true;
             submitInline.disabled = true;
 
-            var elements = document.getElementsByClassName("formValue");
-            var formData = new FormData();
-            for (var i = 0; i < elements.length; i++) {
-                formData.append(elements[i].name, elements[i].type === "checkbox" ? elements[i].checked : elements[i].value);
+            const elements = document.getElementsByClassName("formValue");
+            const formData = new FormData();
+            for (let i = 0; i < elements.length; i++) {
+                const value = elements[i].type === "checkbox" ? (inlineBlocks ? false : elements[i].checked) : elements[i].value;
+                formData.append(elements[i].name, value);
             }
 
             formData.append("convertInlineBlock", inlineBlocks);
 
-            var xhr = new XMLHttpRequest();
+            const xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
-                    var responseText = xhr.responseText;
-                    var resultElement = inlineBlocks ? resultInline : result;
+                    const responseText = xhr.responseText;
+                    const resultElement = inlineBlocks ? resultInline : result;
                     if (!responseText) return;
                     try {
-                        var listOfConvertedItems = JSON.parse(responseText);
+                        const listOfConvertedItems = JSON.parse(responseText);
                         if (listOfConvertedItems.length > 0) {
                             resultElement.innerHTML = listOfConvertedItems.join("<br />");
                             resultElement.style.display = "block";
