@@ -1,4 +1,6 @@
 @using EPiServer.Framework.Web.Resources
+@using EPiServer.Labs.BlockEnhancements.SharedBlocksConverter
+@using EPiServer.Shell
 @using EPiServer.Shell.Navigation
 @using EPiServer.Shell.Navigation.Internal
 
@@ -55,12 +57,23 @@
                 margin-bottom: 32px;
             }
 
+            .container h4 {
+                margin: 16px 0;
+            }
+
             .container .form-value {
                 margin-top: 32px;
             }
 
-            button {
-                background-color: #0037ff;
+            #submit, #submitInline {
+                background-color: lightblue;
+                margin-top: 32px;
+            }
+
+            #result, #resultInline {
+                margin-bottom:  16px;
+                padding: 16px;
+                background-color: lightblue;
             }
         </style>
 </head>
@@ -72,9 +85,10 @@
         <div class="container">
             <h1>Inline Block converter</h1>
             <div>
-                <div id="result"></div>
+                <h4>Convert shared to inline</h4>
+                <div id="result" style="display: none;"></div>
                 <label>
-                    <span>Root id</span><input class="formValue" name="root" type="text" value="1"/>
+                    <span>Start from this contentLink</span><input class="formValue" name="root" type="text" value="1"/>
                 </label>
 
                 <div class="form-value">
@@ -101,14 +115,35 @@
                     <span class="description">Remove all empty assets pane folders</span>
                 </div>
 
-                <button onclick="onConvert()">Convert</button>
+                <button id="submit" onclick="onConvert(false)">Convert</button>
+
+                <h4>Convert inline to shared</h4>
+                <div id="resultInline" style="display: none;"></div>
+                <div>
+                    <span class="description">Move all inline blocks from content areas to their respective `For this...` folders</span>
+                </div>
+
+                <button id="submitInline" onclick="onConvert(true)">Convert all inline blocks to shared</button>
             </div>
         </div>
     </div>
     <script type="text/javascript">
-        function onConvert() {
+        function onConvert(inlineBlocks) {
             var result = document.getElementById("result");
+            var resultInline = document.getElementById("resultInline");
+            var button = document.getElementById("submit");
+            var submitInline = document.getElementById("submitInline");
             result.innerHTML = "";
+            result.style.display = "none";
+            resultInline.innerHTML = "";
+            resultInline.style.display = "none";
+            if (inlineBlocks) {
+                submitInline.innerHTML = "Converting...";
+            } else {
+                button.innerHTML = "Converting...";
+            }
+            button.disabled = true;
+            submitInline.disabled = true;
 
             var elements = document.getElementsByClassName("formValue");
             var formData = new FormData();
@@ -116,17 +151,34 @@
                 formData.append(elements[i].name, elements[i].type === "checkbox" ? elements[i].checked : elements[i].value);
             }
 
+            formData.append("convertInlineBlock", inlineBlocks);
+
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
-                    result.innerHTML = xhr.responseText;
+                    var responseText = xhr.responseText;
+                    var resultElement = inlineBlocks ? resultInline : result;
+                    if (!responseText) return;
+                    try {
+                        var listOfConvertedItems = JSON.parse(responseText);
+                        if (listOfConvertedItems.length > 0) {
+                            resultElement.innerHTML = listOfConvertedItems.join("<br />");
+                            resultElement.style.display = "block";
+                        }
+                    } catch {
+                        resultElement.innerHTML = "No items were converted";
+                        resultElement.style.display = "block";
+                    }
                 }
+
+                button.innerHTML = "Convert";
+                submitInline.innerHTML = "Convert all inline blocks to shared";
+                button.disabled = false;
+                submitInline.disabled = false;
             }
-            xhr.open("post", "/SharedBlocksConverterPlugin/Convert");
+            xhr.open("post", "@Paths.ToResource(typeof(SharedBlocksConverterPluginController).Assembly, "SharedBlocksConverterPlugin/Convert")");
             xhr.setRequestHeader("Accept", "application/json");
             xhr.send(formData);
-
-
         }
     </script>
 </div>
