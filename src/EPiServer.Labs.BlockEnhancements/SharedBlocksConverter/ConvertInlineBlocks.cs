@@ -16,18 +16,53 @@ namespace EPiServer.Labs.BlockEnhancements.SharedBlocksConverter;
 public class ConvertInlineBlocksResult
 {
     public int Analyzed { get; set; }
-    public int ConvertedBlocksCount { get; set; }
-    public int ConvertedContentItems { get; set; }
-    public int FailedContentItems { get; set; }
+    public List<ContentReference> ConvertedBlocks { get; set; }
+    public List<ContentReference> ConvertedContentItems { get; set; }
+    public List<ContentReference> FailedContentItems { get; set; }
+    public bool DryRun { get ; set ; }
+
+    public ConvertInlineBlocksResult(int analyzed, bool dryRun)
+    {
+        Analyzed = analyzed;
+        DryRun = dryRun;
+        ConvertedBlocks = new List<ContentReference>();
+        ConvertedContentItems = new List<ContentReference>();
+        FailedContentItems = new List<ContentReference>();
+    }
 
     public override string ToString()
     {
-        var result = $"Analyzed {Analyzed} content items and converted {ConvertedBlocksCount} in {ConvertedContentItems} content items. ";
-        if (FailedContentItems > 0)
+        if (DryRun)
+        {
+            var dryRunText = $"Analyzed {Analyzed} content versions. ";
+            if (ConvertedContentItems.Any())
+            {
+                dryRunText += $"{ConvertedContentItems.Count} of them contained at least 1 inline block. Their IDs are: ";
+                dryRunText += string.Join(", ", ConvertedContentItems);
+            }
+            else
+            {
+                dryRunText += "None of them contained inline blocks.";
+            }
+
+            return dryRunText;
+        }
+
+        var result =
+            $"Analyzed {Analyzed} content versions. {ConvertedContentItems.Count} of them contained inline blocks. ";
+
+        if (ConvertedContentItems.Count > 0)
+        {
+            result += "Their IDs are: " + string.Join(", ", ConvertedContentItems);
+            result += $". Converted {ConvertedBlocks.Count} inline blocks to regular blocks. ";
+        }
+
+        if (FailedContentItems.Any())
         {
             result +=
-                $"{FailedContentItems} content items with inline blocks failed. Please see the logs for more details.";
+                $"{FailedContentItems} content versions which contained inline blocks failed to convert. Please see the logs for more details.";
         }
+
         return result;
     }
 }
@@ -52,7 +87,7 @@ public class ConvertInlineBlocks
         _labsOptions = labsOptions;
     }
 
-    public ConvertInlineBlocksResult Convert(Action<string> onStatusChanged = null)
+    public ConvertInlineBlocksResult Convert(bool dryRun, Action<string> onStatusChanged = null)
     {
         var versionFilter = new VersionFilter
         {
@@ -61,43 +96,36 @@ public class ConvertInlineBlocks
         };
         var latestVersions = _contentVersionRepository.List(versionFilter, 0, _labsOptions.VersionsToCheck, out var totalCount);
 
-        var convertedBlocksCount = 0;
-        var convertedContentItems = 0;
-        var failedContentItems = 0;
+        var convertInlineBlocksResult = new ConvertInlineBlocksResult(totalCount, dryRun);
         var index = 1;
         var defaultConversionFolderName = "Converted Local Blocks " + DateTime.Now.ToString("u");
         foreach (var version in latestVersions)
         {
             try
             {
-                var convertedBlocks = TryConvertContent(version, defaultConversionFolderName);
+                var convertedBlocks = TryConvertContent(version, defaultConversionFolderName, dryRun);
                 if (convertedBlocks.Any())
                 {
-                    convertedBlocksCount += convertedBlocks.Count();
-                    convertedContentItems++;
+                    convertInlineBlocksResult.ConvertedBlocks.AddRange(convertedBlocks);
+                    convertInlineBlocksResult.ConvertedContentItems.Add(version.ContentLink);
                 }
             }
             catch(Exception ex)
             {
-                failedContentItems++;
+                convertInlineBlocksResult.FailedContentItems.Add(version.ContentLink);
                 _log.Warning($"Failed to convert inline blocks on content item with contentLink = {version.ContentLink}", ex);
             }
 
             onStatusChanged?.Invoke(
-                $"Analyzed {index} out of {totalCount}, so far converted {convertedContentItems} content items, ${failedContentItems} failed");
+                $"Analyzed {index} out of {totalCount}, so far converted {convertInlineBlocksResult.ConvertedContentItems.Count} content items, ${convertInlineBlocksResult.FailedContentItems.Count} failed");
             index++;
         }
 
-        return new ConvertInlineBlocksResult
-        {
-            Analyzed = totalCount,
-            ConvertedBlocksCount = convertedBlocksCount,
-            ConvertedContentItems = convertedContentItems,
-            FailedContentItems = failedContentItems
-        };
+        return convertInlineBlocksResult;
     }
 
-    private IEnumerable<ContentReference> TryConvertContent(ContentVersion version, string defaultConversionFolderName)
+    private IEnumerable<ContentReference> TryConvertContent( ContentVersion version, string defaultConversionFolderName,
+        bool dryRun)
     {
         var content = _contentRepository.Get<IContent>(version.ContentLink);
         if (content is ContentFolder or IContentMedia or not IReadOnly)
@@ -122,15 +150,18 @@ public class ConvertInlineBlocks
                 && propertyData.Value != null
                 && propertyData.Value is ContentArea contentAreaValue)
             {
-                convertedBlocks.AddRange(ConvertContentAreaProperty(writableClone, contentAreaValue, defaultConversionFolderName));
+                convertedBlocks.AddRange(ConvertContentAreaProperty(writableClone, contentAreaValue, defaultConversionFolderName, dryRun));
             }
         }
 
         if (convertedBlocks.Any())
         {
-            _contentRepository.Save(writableClone, SaveAction.Patch, AccessLevel.NoAccess);
-            _log.Information(
-                $"Converted inline blocks on content item with contentLink = {writableClone.ContentLink}, convertedBlocksCount = {convertedBlocks.Count}");
+            if (!dryRun)
+            {
+                _contentRepository.Save(writableClone, SaveAction.Patch, AccessLevel.NoAccess);
+                _log.Information(
+                    $"Converted inline blocks on content item with contentLink = {writableClone.ContentLink}, convertedBlocksCount = {convertedBlocks.Count}");
+            }
 
             return convertedBlocks;
         }
@@ -138,7 +169,8 @@ public class ConvertInlineBlocks
         return Enumerable.Empty<ContentReference>();
     }
 
-    private IEnumerable<ContentReference> ConvertContentAreaProperty(IContent owner, ContentArea propertyDataValue, string defaultConversionFolderName)
+    private IEnumerable<ContentReference> ConvertContentAreaProperty(IContent owner, ContentArea propertyDataValue,
+        string defaultConversionFolderName, bool dryRun)
     {
         var convertedInlineBlocks = new List<ContentReference>();
         for (var index = 0; index < propertyDataValue.Items.Count; index++)
@@ -147,6 +179,12 @@ public class ConvertInlineBlocks
             if (!ContentReference.IsNullOrEmpty(contentAreaItem.ContentLink) || contentAreaItem.InlineBlock == null)
             {
                 continue;
+            }
+
+            if (dryRun)
+            {
+                _log.Information($"ContentLink = ${owner.ContentLink} contains at least one inline block");
+                return new List<ContentReference> { ContentReference.EmptyReference };
             }
 
             var contentType = _contentTypeRepository.Load(contentAreaItem.InlineBlock.ContentTypeID);
