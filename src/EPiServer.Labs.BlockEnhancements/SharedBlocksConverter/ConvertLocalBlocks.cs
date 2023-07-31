@@ -185,7 +185,10 @@ public class ConvertLocalBlocks
                 inlineBlock.Property.Remove(propertyName);
             }
 
-            propertyDataValue.Items[i] = new ContentAreaItem { InlineBlock = inlineBlock };
+            var writableClone = contentAreaItem.CreateWritableClone();
+            writableClone.InlineBlock = inlineBlock;
+            writableClone.ContentLink = null;
+            propertyDataValue.Items[i] = writableClone;
             blocksToDelete.Add(content.ContentLink);
         }
 

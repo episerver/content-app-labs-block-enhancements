@@ -27,7 +27,7 @@ public class ConvertInlineBlocksJob : ScheduledJobBase
         //Call OnStatusChanged to periodically notify progress of job for manually started jobs
         OnStatusChanged(String.Format("Starting execution of {0}", this.GetType()));
 
-        var analyzedInlineBlocks = _convertInlineBlocks.Convert(OnStatusChanged);
+        var analyzedInlineBlocks = _convertInlineBlocks.Convert(false, OnStatusChanged);
 
         if (_stopSignaled)
         {
