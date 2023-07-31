@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using EPiServer.Labs.BlockEnhancements.SharedBlocksConverter;
 using EPiServer.Shell.Modules;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,6 +19,8 @@ namespace EPiServer.Labs.BlockEnhancements
                         pm.Items.Add(new ModuleDetails { Name = "episerver-labs-block-enhancements" });
                     }
                 });
+
+            services.UseSystemTextJsonSerialization(new[] { typeof(SharedBlocksConverterPluginController) });
 
             return services;
         }

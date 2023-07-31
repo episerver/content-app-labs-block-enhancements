@@ -47,9 +47,8 @@ public class SharedBlocksConverterPluginController : Controller
 
         if (dto.convertInlineBlock)
         {
-            var analyzedInlineBlocks = _convertInlineBlocks.Convert(out var convertedInlineBlocks, out var convertedContentItems);
-            result.Add(
-                $"Analyzed {analyzedInlineBlocks} content items and converted {convertedInlineBlocks} inline blocks in {convertedContentItems} content items");
+            var analyzedInlineBlocks = _convertInlineBlocks.Convert(dto.dryRun);
+            result.Add(analyzedInlineBlocks.ToString());
         }
 
         if (dto.convertSharedBlocks)
@@ -83,5 +82,6 @@ public class SharedBlocksConverterPluginController : Controller
         public bool convertLocalBlocks { get; set; }
         public bool cleanupFolders { get; set; }
         public bool convertInlineBlock { get; set; }
+        public bool dryRun { get; set; }
     }
 }
