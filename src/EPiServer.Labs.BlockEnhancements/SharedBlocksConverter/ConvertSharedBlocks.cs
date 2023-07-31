@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using EPiServer.Cms.Shell.UI.Rest.Internal;
 using EPiServer.Core;
 using EPiServer.Security;
@@ -19,17 +20,17 @@ public class ConvertSharedBlocks
         _referencedContentResolver = referencedContentResolver;
     }
 
-    public int Convert(ContentReference rootPage, out int convertedCount)
+    public int Convert(ContentReference rootPage, out int convertedCount, Action<string> onStatusChanged = null)
     {
-        return ConvertRecursively(rootPage, out convertedCount);
+        return ConvertRecursively(rootPage, out convertedCount, onStatusChanged);
     }
 
-    private int ConvertRecursively(ContentReference rootPage, out int convertedCount)
+    private int ConvertRecursively(ContentReference rootPage, out int convertedCount, Action<string> onStatusChanged = null)
     {
-        var analyzedBlocksCount = 0;
         var convertedBlocksCount = 0;
-        var children = _contentRepository.GetChildren<IContent>(rootPage).ToList();
-        analyzedBlocksCount = children.Count;
+
+        var children = _contentRepository.GetChildren<IContent>(rootPage, LanguageSelector.AutoDetect(true)).ToList();
+        var analyzedBlocksCount = children.Count;
         foreach (var content in children)
         {
             if (content is BlockData)
@@ -46,6 +47,9 @@ public class ConvertSharedBlocks
                 analyzedBlocksCount += ConvertRecursively(content.ContentLink, out var convertedChildrenCount);
                 convertedBlocksCount += convertedChildrenCount;
             }
+
+            onStatusChanged?.Invoke(
+                $"Analyzed {analyzedBlocksCount} shared blocks and converted {convertedBlocksCount}");
         }
 
         convertedCount = convertedBlocksCount;

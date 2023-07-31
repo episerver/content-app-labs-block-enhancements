@@ -1,4 +1,6 @@
 @using EPiServer.Framework.Web.Resources
+@using EPiServer.Labs.BlockEnhancements.SharedBlocksConverter
+@using EPiServer.Shell
 @using EPiServer.Shell.Navigation
 @using EPiServer.Shell.Navigation.Internal
 
@@ -15,7 +17,7 @@
     <!-- LightTheme -->
     @ClientResources.RenderResources("ShellCoreLightTheme")
 
-    <style type="text/css">
+    <style>
             html,
             body {
                 height: 100%;
@@ -55,16 +57,28 @@
                 margin-bottom: 32px;
             }
 
+            .container h4 {
+                margin: 16px 0;
+            }
+
             .container .form-value {
                 margin-top: 32px;
             }
 
-            button {
-                background-color: #0037ff;
+            .container button {
+                background-color: lightblue;
+                margin-top: 32px;
+            }
+
+            .container .result {
+                margin-bottom:  16px;
+                padding: 16px;
+                background-color: lightblue;
             }
         </style>
 </head>
 <body>
+@Html.AntiForgeryToken()
 @Html.Raw(Html.CreatePlatformNavigationMenu())
 <noscript>You need to enable JavaScript to run this app.</noscript>
 <div id="wrapper" @Html.Raw(Html.ApplyFullscreenPlatformNavigation())>
@@ -72,9 +86,10 @@
         <div class="container">
             <h1>Inline Block converter</h1>
             <div>
-                <div id="result"></div>
+                <h4>Convert shared to inline</h4>
+                <div id="resultDiv" class="result" style="display: none;"></div>
                 <label>
-                    <span>Root id</span><input class="formValue" name="root" type="text" value="1"/>
+                    <span>Start from this contentLink</span><input class="formValue" name="root" type="text" value="1"/>
                 </label>
 
                 <div class="form-value">
@@ -82,7 +97,7 @@
                         <span>Convert shared blocks to local blocks</span>
                         <input class="formValue" name="convertSharedBlocks" type="checkbox" value="false"/>
                     </label>
-                    <span class="description">Move all shared blocks used only once to "For this page folder"</span>
+                    <span class="description">Move all shared blocks used only once to "For this page folder".</span>
                 </div>
 
                 <div class="form-value">
@@ -90,7 +105,7 @@
                         <span>Inline local blocks into ContentArea properties</span>
                         <input class="formValue" name="convertLocalBlocks" type="checkbox" value="false"/>
                     </label>
-                    <span class="description">Convert all blocks from "For this page" folder to inline blocks</span>
+                    <span class="description">Convert all blocks from "For this page" folder to inline blocks.</span>
                 </div>
 
                 <div class="form-value">
@@ -101,32 +116,84 @@
                     <span class="description">Remove all empty assets pane folders</span>
                 </div>
 
-                <button onclick="onConvert()">Convert</button>
+                <button id="submitButton" onclick="onConvert(false)">Convert</button>
+
+                <h4>Convert inline to shared</h4>
+                <div id="resultInlineDiv" class="result" style="display: none;"></div>
+                <div>
+                    <span class="description">Move all inline blocks from content areas to their respective `For this...` folders.</span>
+                </div>
+                <div>
+                    <span class="description">You can click `Dry run` to see items which contain inline blocks without converting them.</span>
+                </div>
+
+                <button id="dryRunButton" onclick="onConvert(true, true)">Dry run</button>
+                <button id="submitInlineButton" onclick="onConvert(true, false)">Convert all inline blocks to shared</button>
             </div>
         </div>
     </div>
     <script type="text/javascript">
-        function onConvert() {
-            var result = document.getElementById("result");
-            result.innerHTML = "";
-
-            var elements = document.getElementsByClassName("formValue");
-            var formData = new FormData();
-            for (var i = 0; i < elements.length; i++) {
-                formData.append(elements[i].name, elements[i].type === "checkbox" ? elements[i].checked : elements[i].value);
-            }
-
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    result.innerHTML = xhr.responseText;
+        function onConvert(inlineBlocks, dryRun) {
+            const resultDiv = document.getElementById("resultDiv");
+            const resultInlineDiv = document.getElementById("resultInlineDiv");
+            const submitButton = document.getElementById("submitButton");
+            const submitInlineButton = document.getElementById("submitInlineButton");
+            const dryRunButton = document.getElementById("dryRunButton");
+            resultDiv.innerHTML = "";
+            resultDiv.style.display = "none";
+            resultInlineDiv.innerHTML = "";
+            resultInlineDiv.style.display = "none";
+            if (dryRun) {
+                dryRunButton.innerHTML = "Running...";
+            } else {
+                if (inlineBlocks) {
+                    submitInlineButton.innerHTML = "Converting...";
+                } else {
+                    submitButton.innerHTML = "Converting...";
                 }
             }
-            xhr.open("post", "/SharedBlocksConverterPlugin/Convert");
+            submitButton.disabled = true;
+            submitInlineButton.disabled = true;
+            dryRunButton.disabled = true;
+
+            const elements = document.getElementsByClassName("formValue");
+            const formData = new FormData();
+            for (let i = 0; i < elements.length; i++) {
+                const value = elements[i].type === "checkbox" ? (inlineBlocks ? false : elements[i].checked) : elements[i].value;
+                formData.append(elements[i].name, value);
+            }
+
+            formData.append("convertInlineBlock", inlineBlocks);
+            formData.append("dryRun", dryRun || false);
+
+            const xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const responseText = xhr.responseText;
+                    const resultElement = inlineBlocks ? resultInlineDiv : resultDiv;
+                    if (!responseText) return;
+                    try {
+                        const listOfConvertedItems = JSON.parse(responseText);
+                        if (listOfConvertedItems.length > 0) {
+                            resultElement.innerHTML = listOfConvertedItems.join("<br />");
+                            resultElement.style.display = "block";
+                        }
+                    } catch {
+                        resultElement.innerHTML = "No items were converted";
+                        resultElement.style.display = "block";
+                    }
+
+                    submitButton.innerHTML = "Convert";
+                    submitInlineButton.innerHTML = "Convert all inline blocks to shared";
+                    dryRunButton.innerHTML = "Dry run";
+                    submitButton.disabled = false;
+                    submitInlineButton.disabled = false;
+                    dryRunButton.disabled = false;
+                }
+            }
+            xhr.open("post", "@Paths.ToResource(typeof(SharedBlocksConverterPluginController).Assembly, "SharedBlocksConverterPlugin/Convert")");
             xhr.setRequestHeader("Accept", "application/json");
             xhr.send(formData);
-
-
         }
     </script>
 </div>
