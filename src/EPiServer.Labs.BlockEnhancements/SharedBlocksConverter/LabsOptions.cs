@@ -6,4 +6,6 @@ namespace EPiServer.Labs.BlockEnhancements.SharedBlocksConverter;
 public class LabsOptions
 {
     public bool MigrateInlineBlocksToForThisPageFolders { get; set; } = true;
+
+    public bool RemoveConvertedLocalBlocks { get; set; } = true;
 }

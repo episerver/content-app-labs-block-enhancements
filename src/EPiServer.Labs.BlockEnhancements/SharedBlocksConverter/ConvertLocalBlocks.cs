@@ -22,15 +22,18 @@ public class ConvertLocalBlocks
     private readonly IContentCapability _localContentCapability;
     private readonly IBlockPropertyFactory _blockPropertyFactory;
     private readonly ILanguageBranchRepository _languageBranchRepository;
+    private readonly LabsOptions _labsOptions;
     private static readonly ILogger _log = LogManager.GetLogger(typeof(ConvertLocalBlocks));
 
     public ConvertLocalBlocks(IContentRepository contentRepository, IEnumerable<IContentCapability> capabilities,
-        IBlockPropertyFactory blockPropertyFactory, IContentVersionRepository contentVersionRepository, ILanguageBranchRepository languageBranchRepository)
+        IBlockPropertyFactory blockPropertyFactory, IContentVersionRepository contentVersionRepository,
+        ILanguageBranchRepository languageBranchRepository, LabsOptions labsOptions)
     {
         _contentRepository = contentRepository;
         _blockPropertyFactory = blockPropertyFactory;
         _contentVersionRepository = contentVersionRepository;
         _languageBranchRepository = languageBranchRepository;
+        _labsOptions = labsOptions;
         _localContentCapability = capabilities.Single(x => x.Key == "isLocalContent");
     }
 
@@ -132,14 +135,16 @@ public class ConvertLocalBlocks
             _log.Information(
                 $"Converted local blocks on content item with contentLink = {writableClone.ContentLink}, convertedBlocksCout = {convertedBlocks.Count}");
 
-            //TODO: option if should do force delete
-            // foreach (var contentReference in blocksToDelete)
-            // {
-            //     if (_contentRepository.TryGet<IContent>(contentReference, out var _))
-            //     {
-            //         _contentRepository.Delete(contentReference, true, AccessLevel.NoAccess);
-            //     }
-            // }
+            if (_labsOptions.RemoveConvertedLocalBlocks)
+            {
+                foreach (var contentReference in convertedBlocks)
+                {
+                    if (_contentRepository.TryGet<IContent>(contentReference, out _))
+                    {
+                        _contentRepository.Delete(contentReference, true, AccessLevel.NoAccess);
+                    }
+                }
+            }
 
             return true;
         }
