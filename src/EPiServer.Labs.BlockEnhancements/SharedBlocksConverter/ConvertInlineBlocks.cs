@@ -7,6 +7,8 @@ using EPiServer.Core;
 using EPiServer.Data.Entity;
 using EPiServer.DataAbstraction;
 using EPiServer.DataAccess;
+using EPiServer.DataAccess.Internal;
+using EPiServer.Framework;
 using EPiServer.Logging;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
@@ -75,6 +77,7 @@ public class ConvertInlineBlocks
     private readonly IContentTypeRepository _contentTypeRepository;
     private readonly IContentChangeManager _contentChangeManager;
     private readonly LabsOptions _labsOptions;
+    private const int _batchSize = 100;
     private static readonly ILogger _log = LogManager.GetLogger(typeof(ConvertInlineBlocks));
 
     public ConvertInlineBlocks(IContentRepository contentRepository, IContentChangeManager contentChangeManager,
@@ -94,32 +97,46 @@ public class ConvertInlineBlocks
             SortColumn = VersionSortColumn.Saved,
             SortDirection = VersionSortDirection.Descending
         };
-        var latestVersions = _contentVersionRepository.List(versionFilter, 0, _labsOptions.VersionsToCheck, out var totalCount);
+        _contentVersionRepository.List(versionFilter, 0, 1, out var totalCount);
 
         var convertInlineBlocksResult = new ConvertInlineBlocksResult(totalCount, dryRun);
         var index = 1;
         var defaultConversionFolderName = "Converted Local Blocks " + DateTime.Now.ToString("u");
-        foreach (var version in latestVersions)
-        {
-            try
-            {
-                var convertedBlocks = TryConvertContent(version, defaultConversionFolderName, dryRun);
-                if (convertedBlocks.Any())
-                {
-                    convertInlineBlocksResult.ConvertedBlocks.AddRange(convertedBlocks);
-                    convertInlineBlocksResult.ConvertedContentItems.Add(version.ContentLink);
-                }
-            }
-            catch(Exception ex)
-            {
-                convertInlineBlocksResult.FailedContentItems.Add(version.ContentLink);
-                _log.Warning($"Failed to convert inline blocks on content item with contentLink = {version.ContentLink}", ex);
-            }
+        var iterationsCount = totalCount / _batchSize;
+        
+        //Make sure SaveDate is different, else import will ignore it since it is uptodate
+        ContextCache.Current[ContentSaveDB.UseIChangeTrackingSavedKey] = true;
 
-            onStatusChanged?.Invoke(
-                $"Analyzed {index} out of {totalCount}, so far converted {convertInlineBlocksResult.ConvertedContentItems.Count} content items, ${convertInlineBlocksResult.FailedContentItems.Count} failed");
-            index++;
+        for (var i = 0; i < iterationsCount; i++)
+        {
+            var latestVersions = _contentVersionRepository.List(versionFilter, i * _batchSize, _batchSize, out _);
+            
+            foreach (var version in latestVersions)
+            {
+                try
+                {
+                    var convertedBlocks = TryConvertContent(version, defaultConversionFolderName, dryRun);
+                    if (convertedBlocks.Any())
+                    {
+                        convertInlineBlocksResult.ConvertedBlocks.AddRange(convertedBlocks);
+                        convertInlineBlocksResult.ConvertedContentItems.Add(version.ContentLink);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    convertInlineBlocksResult.FailedContentItems.Add(version.ContentLink);
+                    _log.Warning(
+                        $"Failed to convert inline blocks on content item with contentLink = {version.ContentLink}",
+                        ex);
+                }
+
+                onStatusChanged?.Invoke(
+                    $"Analyzed {index} out of {totalCount}, so far converted {convertInlineBlocksResult.ConvertedContentItems.Count} content items, ${convertInlineBlocksResult.FailedContentItems.Count} failed");
+                index++;
+            }
         }
+        
+        ContextCache.Current[ContentSaveDB.UseIChangeTrackingSavedKey] = null;
 
         return convertInlineBlocksResult;
     }
