@@ -102,15 +102,15 @@ public class ConvertInlineBlocks
         var convertInlineBlocksResult = new ConvertInlineBlocksResult(totalCount, dryRun);
         var index = 1;
         var defaultConversionFolderName = "Converted Local Blocks " + DateTime.Now.ToString("u");
-        var iterationsCount = totalCount / _batchSize;
-        
+        var iterationsCount = Math.Ceiling((decimal)totalCount / _batchSize);
+
         //Make sure SaveDate is different, else import will ignore it since it is uptodate
         ContextCache.Current[ContentSaveDB.UseIChangeTrackingSavedKey] = true;
 
         for (var i = 0; i < iterationsCount; i++)
         {
             var latestVersions = _contentVersionRepository.List(versionFilter, i * _batchSize, _batchSize, out _);
-            
+
             foreach (var version in latestVersions)
             {
                 try
@@ -135,7 +135,7 @@ public class ConvertInlineBlocks
                 index++;
             }
         }
-        
+
         ContextCache.Current[ContentSaveDB.UseIChangeTrackingSavedKey] = null;
 
         return convertInlineBlocksResult;
