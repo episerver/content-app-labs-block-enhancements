@@ -1,9 +1,20 @@
-> **_NOTE:_**  EPiServer.Labs.BlockEnhancements will be obsoleted soon. Most of its functionality was moved to the Core package.
-One of the features which is to allow editors to create inlined Blocks list was released as part of 12.18.0 as described here https://world.optimizely.com/blogs/bartosz-sekula/dates/2023/1/official-list-property-support/
-This is the last version which only contains a migration tool to move blocks to the new format inside ContentArea and run a little clean up of empty folders and usused blocks.
-
 # Episerver Labs - Block Enhancements
+This projects contains a migration tool which lets an admin to convert blocks from one format to the other.
+![migration tool](assets/docsimages/migration-tool.png)
 
+The top section allows an admin to run the conversion from shared to inline.
+It can be run independently, one by one. First we need to convert shared blocks to local - so 
+to move blocks from the Assets pane hierarchy to respective `For this page/block' folders.
+Then once we are sure that each block is only used once we can make it inline.
+
+There is also a separate option to clean up empty folders from the hierarchy.
+
+Another feature is the conversion from inline to shared. If inline blocks exist in the
+system it might be hard to find them since they do not have an ID of their own.
+This migration tool makes it possible to convert them to regular blocks with contentLink 
+and place them in respective `For this page/block` folders. It is also possible to place
+all newly created blocks in a specific folder named as `"Converted Local Blocks " + DateTime.Now.ToString("u")`
+and placed under the assets root `For all sites`.
 
 ### Please note
 > Episerver Labs projects are meant to provide the developer community with pre-release features with the purpose of showcasing ongoing work and getting feedback in early stages of development.
