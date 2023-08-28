@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using EPiServer.Authorization;
 using EPiServer.Core;
 using EPiServer.Shell.Web.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EPiServer.Labs.BlockEnhancements.SharedBlocksConverter;
 
-[Authorize(Roles = "CmsAdmin,WebAdmins,Administrators")]
+[Authorize(Policy = CmsPolicyNames.CmsAdmin)]
 public class SharedBlocksConverterPluginController : Controller
 {
     private readonly ConvertInlineBlocks _convertInlineBlocks;
