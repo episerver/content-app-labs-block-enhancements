@@ -29,4 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EPiServer.Labs.BlockEnhancements\EPiServer.Labs.BlockEnhancements.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Remove="module.config" />
+  </ItemGroup>
 </Project>

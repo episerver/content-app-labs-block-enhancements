@@ -9,6 +9,7 @@ using Alloy.Sample.Models.Blocks;
 using Alloy.Sample.Models.Media;
 using Alloy.Sample.Models.Pages;
 using EPiServer;
+using EPiServer.Authorization;
 using EPiServer.Cms.Shell;
 using EPiServer.Core;
 using EPiServer.DataAccess;
@@ -44,7 +45,7 @@ namespace Alloy.Sample.Business.Plugins
     }
 
 
-    [Authorize(Roles = "CmsAdmin,WebAdmins,Administrators")]
+    [Authorize(Policy = CmsPolicyNames.CmsAdmin)]
     public class NewsGeneratorPluginController : Controller
     {
         public IActionResult Index()
